@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <!-- إعدادات النشر والميتا الأساسية -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#060913">
+    <meta name="description" content="تطبيق مترو القاهرة الذكي - دليلك الأسرع لمعرفة مسارك، عدد المحطات، سعر التذكرة، والوقت المتوقع، بدون إنترنت. يشمل خطوط المترو الثلاثة، مونوريل شرق النيل، والقطار الكهربائي الخفيف.">
+    <meta name="keywords" content="مترو, القاهرة, مواصلات, مصر, تذكرة, خريطة المترو, مونوريل, القطار الخفيف">
+    <meta name="author" content="Metro App">
+
+    <!-- إعدادات PWA للآيفون والأندرويد -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="مترو">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+
+    <title>مترو | دليلك الذكي</title>
+
+    <!-- الخطوط -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================= المتغيرات الأساسية ================= */
+        :root {
+            --bg-base: #060913;
+            --glass-bg: rgba(17, 25, 40, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+
+            /* ألوان الشبكة */
+            --l1: #0078D7; --l2: #FFC107; --l3: #00B259;
+            --mono: #9C27B0; --lrt: #00BCD4;
+            --warn: #f59e0b; --warn-bg: rgba(245, 158, 11, 0.14); --warn-border: rgba(245, 158, 11, 0.35);
+            --ok: #10b981;
+
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-lg: 24px; --radius-md: 16px;
+            --trans: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* ================= التنسيق العام ================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            height: 100dvh;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* خلفية نيون متحركة */
+        .ambient-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background:
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.12), transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(0, 178, 89, 0.12), transparent 40%),
+                radial-gradient(circle at 50% 100%, rgba(156, 39, 176, 0.08), transparent 40%);
+            animation: breathe 10s ease-in-out infinite alternate;
+        }
+        @keyframes breathe { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.1); opacity: 1; } }
+
+        /* تصميم شريط التمرير */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        #app { display: flex; flex: 1 1 auto; min-height: 0; width: 100%; }
+
+        /* ================= الشريط العلوي ================= */
+        #topbar {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top));
+            background: rgba(8, 12, 22, 0.9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--glass-border); flex: 0 0 auto; z-index: 200;
+        }
+        .topbar-brand { font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+        .topbar-actions { display: flex; align-items: center; gap: 8px; }
+        .net-pill {
+            font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 20px;
+            background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);
+            transition: var(--trans); white-space: nowrap;
+        }
+        .net-pill.offline { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+        .install-pill {
+            font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 20px;
+            background: var(--accent); color: #fff; border: none; cursor: pointer; transition: var(--trans);
+        }
+        .install-pill:active { transform: scale(0.95); }
+        .install-pill[hidden] { display: none; }
+
+        /* ================= شريط التنقل (Navigation) ================= */
+        nav {
+            background: rgba(10, 15, 28, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-btn {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-muted); text-decoration: none; cursor: pointer; transition: var(--trans);
+            padding: 12px 0; position: relative;
+        }
+
+        .nav-btn svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; transition: var(--trans); }
+        .nav-btn span { font-size: 12px; font-weight: 700; transition: var(--trans); }
+
+        .nav-btn.active { color: var(--accent); }
+        .nav-btn.active svg { transform: translateY(-2px); filter: drop-shadow(0 4px 6px var(--accent-glow)); }
+
+        /* ================= الحاويات الزجاجية ================= */
+        main { flex: 1; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
+
+        .view-section { display: none; padding: 20px; padding-top: 20px; max-width: 800px; margin: 0 auto; animation: fadeUp 0.4s ease forwards; }
+        .view-section.active { display: block; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 24px; box-shadow: var(--glass-shadow); margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 34px; font-weight: 900;
+            background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 6px; letter-spacing: -1px;
+        }
+
+        /* ================= عناصر الإدخال ================= */
+        .input-wrapper { position: relative; margin-bottom: 24px; }
+        .input-wrapper label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+        .input-field {
+            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+            color: white; padding: 18px 20px; border-radius: var(--radius-md); font-size: 16px; font-weight: 600;
+            outline: none; transition: var(--trans); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), inset 0 2px 4px rgba(0,0,0,0.2); }
+        .input-field::placeholder { color: rgba(255,255,255,0.2); font-weight: 400; }
+
+        /* القائمة المنبثقة للبحث عن المحطات */
+        .combo-panel {
+            position: absolute; top: 100%; right: 0; left: 0; margin-top: 6px;
+            background: rgba(10, 15, 28, 0.97); border: 1px solid var(--glass-border); border-radius: 14px;
+            max-height: 260px; overflow-y: auto; z-index: 50; display: none;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5); backdrop-filter: blur(12px);
+        }
+        .combo-panel.open { display: block; animation: fadeUp 0.15s ease; }
+        .combo-item {
+            display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer;
+            font-size: 14px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .combo-item:last-child { border-bottom: none; }
+        .combo-item:hover, .combo-item.active { background: rgba(59, 130, 246, 0.18); }
+        .combo-dots { display: flex; gap: 3px; flex-shrink: 0; }
+        .combo-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .combo-empty { padding: 14px; font-size: 13px; color: var(--text-muted); text-align: center; }
+
+        .swap-btn {
+            position: absolute; top: 50%; left: 24px; transform: translateY(-50%);
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white;
+            width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; backdrop-filter: blur(8px); transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 51;
+        }
+        .swap-btn:hover, .swap-btn:active { background: var(--accent); transform: translateY(-50%) rotate(180deg); }
+
+        .btn-main {
+            width: 100%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;
+            border: none; padding: 18px; border-radius: var(--radius-md); font-size: 18px; font-weight: 700;
+            cursor: pointer; transition: var(--trans); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-main:active { transform: scale(0.97); }
+
+        /* رقائق الرحلات الأخيرة */
+        .recent-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 18px; }
+        .recent-chips[hidden] { display: none; }
+        .recent-label { font-size: 12px; color: var(--text-muted); font-weight: 700; }
+        .recent-chip {
+            background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); color: #cbd5e1;
+            font-size: 12px; font-weight: 600; padding: 7px 12px; border-radius: 20px; cursor: pointer;
+            transition: var(--trans); font-family: inherit;
+        }
+        .recent-chip:hover { background: rgba(59, 130, 246, 0.2); border-color: var(--accent); }
+
+        /* ================= النتائج والتسلسل الزمني ================= */
+        /* شريط ملخص الرحلة (طابع لوحة المحطات الرقمية) */
+        .summary-strip {
+            display: flex; align-items: center; gap: 6px; overflow-x: auto; padding: 4px 2px 14px;
+            margin-bottom: 18px; border-bottom: 1px dashed var(--glass-border);
+        }
+        .summary-seg {
+            display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--seg-color, var(--glass-border)); border-radius: 10px; padding: 6px 10px;
+            font-family: var(--font-mono); font-size: 13px; font-weight: 700; white-space: nowrap; flex-shrink: 0;
+        }
+        .summary-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .summary-arrow { color: var(--text-muted); font-size: 14px; flex-shrink: 0; }
+
+        /* تنبيه القطاعات قيد التشغيل التجريبي */
+        .notice-banner {
+            display: flex; gap: 10px; align-items: flex-start; background: var(--warn-bg);
+            border: 1px solid var(--warn-border); color: #fbbf24; padding: 14px 16px; border-radius: 14px;
+            font-size: 13px; line-height: 1.7; margin-bottom: 18px;
+        }
+        .notice-banner[hidden] { display: none; }
+        .notice-banner b { color: #fde68a; }
+        .notice-banner .ic { font-size: 18px; line-height: 1; flex-shrink: 0; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 30px; }
+        .stat-card {
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);
+            padding: 16px 8px; border-radius: var(--radius-md); text-align: center;
+        }
+        .stat-card span { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+        .stat-card strong { font-size: 20px; font-weight: 900; line-height: 1.2; display: flex; flex-direction: column; align-items: center; gap: 6px; font-family: var(--font-mono); }
+        .stat-card strong.multi { font-size: 12px; gap: 6px; }
+        .fare-row { display: flex; align-items: center; gap: 5px; }
+        .fare-row i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+        .ticket-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; color: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-family: 'Cairo', sans-serif; }
+
+        /* التايم لاين */
+        .route-timeline { position: relative; padding-right: 30px; }
+        .route-timeline::before { content: ''; position: absolute; top: 10px; bottom: 10px; right: 15px; width: 2px; background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+        .tl-node { position: relative; margin-bottom: 24px; opacity: 0; transform: translateX(20px); animation: slideInNode 0.5s ease forwards; }
+        @keyframes slideInNode { to { opacity: 1; transform: translateX(0); } }
+
+        .tl-marker {
+            position: absolute; right: -36px; top: 16px; width: 14px; height: 14px; border-radius: 50%;
+            background: var(--bg-base); border: 3px solid #fff; z-index: 1; box-shadow: 0 0 0 4px rgba(0,0,0,0.5);
+        }
+        .tl-marker.pulse { animation: markerPulse 2s infinite; }
+        @keyframes markerPulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
+        .tl-box {
+            background: rgba(0,0,0,0.25); padding: 16px; border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border); transition: var(--trans);
+        }
+        .tl-box:hover { background: rgba(255,255,255,0.05); }
+        .tl-box h4 { font-size: 17px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+        .tl-box p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+        .line-label { padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; }
+
+        /* تنبيهات الخطأ */
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 16px; border-radius: var(--radius-md); text-align: center; margin-top: 16px; font-weight: 600;
+            display: none; animation: shake 0.4s ease;
+        }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+
+        /* ================= دليل الشبكة ================= */
+        .line-card { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .line-card:last-child { border-bottom: none; }
+        .line-dot { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; margin-top: 4px; }
+        .line-card-name { font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .line-card-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 8px; }
+        .status-ok { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .status-partial { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+        .update-log { list-style: none; }
+        .update-log li { font-size: 13px; color: var(--text-muted); line-height: 1.8; margin-bottom: 10px; padding-right: 18px; position: relative; }
+        .update-log li::before { content: '●'; position: absolute; right: 0; top: 4px; color: var(--accent); font-size: 9px; }
+        .update-log li b { color: var(--text-main); }
+
+        .sources-note { font-size: 11px; color: rgba(148, 163, 184, 0.7); line-height: 1.8; text-align: center; padding: 8px 12px 24px; }
+
+        /* نصيحة تثبيت آيفون */
+        .ios-tip {
+            position: fixed; bottom: 90px; right: 16px; left: 16px; max-width: 420px; margin: 0 auto;
+            background: rgba(15, 20, 35, 0.97); border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 14px 16px; font-size: 13px; line-height: 1.7; box-shadow: var(--glass-shadow);
+            z-index: 300; backdrop-filter: blur(14px);
+        }
+        .ios-tip[hidden] { display: none; }
+        .ios-tip button {
+            margin-top: 8px; background: var(--accent); border: none; color: #fff; font-size: 12px; font-weight: 700;
+            padding: 6px 14px; border-radius: 10px; cursor: pointer; font-family: inherit;
+        }
+
+        /* ================= إمكانية الوصول ================= */
+        button:focus-visible, a:focus-visible, input:focus-visible, .combo-item:focus-visible {
+            outline: 2px solid var(--accent); outline-offset: 2px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* ================= التجاوب (Responsive Design) ================= */
+        @media (max-width: 767px) {
+            #app { flex-direction: column; }
+            nav { order: 2; }
+            main { order: 1; }
+        }
+
+        @media (min-width: 768px) {
+            nav { flex-direction: column; width: 100px; border-right: 1px solid var(--glass-border); border-top: none; justify-content: center; padding: 0; }
+            .nav-btn { flex: none; height: 100px; }
+            main { display: flex; align-items: center; justify-content: center; padding: 40px; }
+            .view-section { width: 100%; max-width: 900px; padding: 0; margin: 0; }
+            .split-layout { display: grid; grid-template-columns: 1.2fr 1.5fr; gap: 40px; align-items: start; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg"></div>
+
+    <!-- الشريط العلوي: الحالة + التثبيت -->
+    <div id="topbar">
+        <div class="topbar-brand">🚇 مترو القاهرة</div>
+        <div class="topbar-actions">
+            <span id="netPill" class="net-pill">🟢 متصل</span>
+            <button id="installBtn" class="install-pill" hidden type="button">⬇️ تثبيت التطبيق</button>
+        </div>
+    </div>
+
+    <div id="app">
+        <!-- شريط التنقل المتجاوب -->
+        <nav>
+            <a class="nav-btn active" data-target="route-view">
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <span>رحلتي</span>
+            </a>
+            <a class="nav-btn" data-target="guide-view">
+                <svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+                <span>الشبكة</span>
+            </a>
+        </nav>
+
+        <main>
+            <!-- 1. شاشة الملاحة الأساسية -->
+            <section id="route-view" class="view-section active">
+                <div class="split-layout">
+
+                    <!-- لوحة البحث -->
+                    <div>
+                        <div style="margin-bottom: 24px;">
+                            <h1 class="page-title">مترو القاهرة 🚇</h1>
+                            <p style="color: var(--text-muted); font-size: 15px;">دليلك الذكي لخطوط المترو الثلاثة، مونوريل شرق النيل، والقطار الكهربائي الخفيف.</p>
+                        </div>
+
+                        <div id="recentChips" class="recent-chips" hidden></div>
+
+                        <div class="glass-panel">
+                            <div style="position: relative;">
+                                <div class="input-wrapper">
+                                    <label for="inStart">منين؟ (محطة الانطلاق)</label>
+                                    <input type="text" id="inStart" class="input-field" placeholder="مثال: المرج الجديدة" autocomplete="off">
+                                </div>
+
+                                <button class="swap-btn" id="btnSwap" aria-label="تبديل المحطتين" type="button">⇅</button>
+
+                                <div class="input-wrapper" style="margin-bottom: 20px;">
+                                    <label for="inEnd">رايح فين؟ (محطة الوصول)</label>
+                                    <input type="text" id="inEnd" class="input-field" placeholder="مثال: جامعة القاهرة" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <button class="btn-main" id="btnRoute" type="button">
+                                ابدأ الرحلة
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </button>
+                            <div class="alert-error" id="msgError" role="alert" aria-live="assertive"></div>
+                        </div>
+                    </div>
+
+                    <!-- لوحة النتائج (تظهر بعد الحساب) -->
+                    <div id="panelResult" style="display: none;" aria-live="polite">
+                        <div class="glass-panel">
+                            <h3 style="margin-bottom: 8px; font-size: 18px;">تفاصيل الرحلة</h3>
+
+                            <div class="summary-strip" id="summaryStrip"></div>
+
+                            <div class="notice-banner" id="pendingNotice" hidden>
+                                <span class="ic">🚧</span>
+                                <span>يتضمن هذا المسار محطات <b>قيد التشغيل التجريبي</b> أو لا تزال في طور الافتتاح (مثل امتدادات مونوريل شرق النيل أو القطار الكهربائي الخفيف). تأكد من حالة التشغيل عبر الإعلانات الرسمية قبل التحرك.</span>
+                            </div>
+
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <span>التكلفة</span>
+                                    <strong id="outPrice">-</strong>
+                                </div>
+                                <div class="stat-card">
+                                    <span>الوقت المتوقع</span>
+                                    <strong id="outTime">-</strong>
+                                </div>
+                                <div class="stat-card">
+                                    <span>محطات</span>
+                                    <strong id="outStops">-</strong>
+                                </div>
+                            </div>
+
+                            <div class="route-timeline" id="outTimeline">
+                                <!-- سيتم حقن مسار الرحلة هنا بواسطة JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- 2. شاشة الدليل ومعلومات الشبكة -->
+            <section id="guide-view" class="view-section">
+                <h1 class="page-title" style="margin-bottom: 24px;">دليل الشبكة 🗺️</h1>
+
+                <div class="split-layout">
+                    <div>
+                        <!-- كارت الأسعار -->
+                        <div class="glass-panel">
+                            <h3 style="margin-bottom: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">تذاكر المترو (مُحدّثة 27 مارس 2026)</h3>
+                            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                                    <span style="font-weight: 600;">من 1 إلى 9 محطات</span>
+                                    <span class="ticket-badge" style="background: #FFC107;">10 ج.م</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                                    <span style="font-weight: 600;">من 10 إلى 16 محطة</span>
+                                    <span class="ticket-badge" style="background: #00B259; color: white;">12 ج.م</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                                    <span style="font-weight: 600;">من 17 إلى 23 محطة</span>
+                                    <span class="ticket-badge" style="background: #F06292; color: white;">15 ج.م</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600;">أكثر من 23 محطة</span>
+                                    <span class="ticket-badge" style="background: #9E9E9E; color: white;">20 ج.م</span>
+                                </div>
+                            </div>
+
+                            <h3 style="margin: 24px 0 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">تذاكر مونوريل شرق النيل</h3>
+                            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                                    <span style="font-weight: 600;">من 1 إلى 5 محطات</span>
+                                    <span class="ticket-badge" style="background: #CE93D8;">20 ج.م</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                                    <span style="font-weight: 600;">من 6 إلى 10 محطات</span>
+                                    <span class="ticket-badge" style="background: #AB47BC; color:white;">40 ج.م</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                                    <span style="font-weight: 600;">من 11 إلى 15 محطة</span>
+                                    <span class="ticket-badge" style="background: #8E24AA; color:white;">55 ج.م</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600;">أكثر من 15 محطة</span>
+                                    <span class="ticket-badge" style="background: #6A1B9A; color:white;">80 ج.م</span>
+                                </div>
+                            </div>
+                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 16px; line-height: 1.7;">
+                                💡 تذكرة القطار الكهربائي الخفيف (LRT) تُحدَّد حسب المسافة عبر شباك التذاكر، ولا تتوفر بيانات تعريفة موحّدة ومؤكدة لكل المحطات بعد — يفضّل مراجعتها مباشرة قبل السفر.
+                            </p>
+                        </div>
+
+                        <!-- كارت آخر التحديثات -->
+                        <div class="glass-panel">
+                            <h3 style="margin-bottom: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">آخر تحديثات الشبكة</h3>
+                            <ul class="update-log" style="margin-top: 16px;">
+                                <li><b>27 مارس 2026:</b> تحديث تعريفة تذاكر المترو إلى 10 / 12 / 15 / 20 جنيهًا حسب عدد المحطات.</li>
+                                <li><b>6 مايو 2026:</b> افتتاح أول 16 محطة من مونوريل شرق النيل، من "المشير طنطاوي" إلى "مدينة العدالة" بالعاصمة الإدارية.</li>
+                                <li><b>متوقع نهاية يونيو / يوليو 2026:</b> تشغيل آخر 6 محطات من مونوريل شرق النيل، من "الاستاد" إلى "جيهان السادات"، لتكتمل بذلك الـ22 محطة.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- كارت الخطوط -->
+                    <div class="glass-panel">
+                        <h3 style="margin-bottom: 8px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">دليل الخطوط</h3>
+                        <div id="linesGuide" style="margin-top: 8px;"></div>
+
+                        <h3 style="margin: 24px 0 8px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">قيد الإنشاء (غير متاح للتخطيط بعد)</h3>
+                        <div class="line-card">
+                            <div class="line-dot" style="background:#78909C;"></div>
+                            <div>
+                                <div class="line-card-name">مونوريل غرب النيل (٦ أكتوبر) <span class="status-badge status-partial">🚧 تحت الإنشاء</span></div>
+                                <div class="line-card-sub">يربط محافظة الجيزة ومدينتي ٦ أكتوبر والشيخ زايد بالخط الثالث للمترو. لم يتم تأكيد القائمة النهائية للمحطات رسميًا حتى تاريخ هذا التحديث.</div>
+                            </div>
+                        </div>
+                        <div class="line-card">
+                            <div class="line-dot" style="background:#78909C;"></div>
+                            <div>
+                                <div class="line-card-name">الخط الرابع للمترو <span class="status-badge status-partial">🚧 تحت الإنشاء</span></div>
+                                <div class="line-card-sub">خط جديد قيد الإنشاء، سيُضاف إلى التطبيق فور توفر بيانات رسمية كاملة عن مساره ومحطاته.</div>
+                            </div>
+                        </div>
+
+                        <p class="sources-note">
+                            البيانات مجمّعة من تصريحات وزارة النقل والهيئة القومية لمترو الأنفاق ومصادر إخبارية رسمية حتى يونيو 2026.
+                            قد تتغيّر الأسعار والمواعيد دون إشعار مسبق — يُرجى تأكيد مواعيد القطارات الدقيقة من الشاشات والقنوات الرسمية.
+                            <br>الإصدار 2.0
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- نصيحة تثبيت آيفون (لا يدعم Safari حدث beforeinstallprompt) -->
+    <div class="ios-tip" id="iosTip" hidden>
+        📲 لتثبيت التطبيق على الشاشة الرئيسية: اضغط على زر <b>المشاركة</b> أسفل المتصفح، ثم اختر <b>"إضافة إلى الشاشة الرئيسية"</b>.
+        <br>
+        <button id="iosTipClose" type="button">حسنًا، فهمت</button>
+    </div>
+
+    <!-- ================= JavaScript (Logic & Algorithms) ================= -->
+    <script>
+        /** --- 1. Data Models --- */
+        const LINES = {
+            L1:  { name: "الخط الأول",  hex: "#0078D7", sub: "حلوان ↔ المرج الجديدة" },
+            L2:  { name: "الخط الثاني", hex: "#FFC107", sub: "المنيب ↔ شبرا الخيمة", dark: true },
+            L3:  { name: "الخط الثالث", hex: "#00B259", sub: "عدلي منصور ↔ جامعة القاهرة / روض الفرج" },
+            ME:  { name: "مونوريل شرق النيل", hex: "#9C27B0", sub: "الاستاد ↔ مدينة العدالة" },
+            LRT: { name: "القطار الكهربائي الخفيف", hex: "#00BCD4", sub: "عدلي منصور ↔ العاصمة المركزية / العاشر من رمضان", dark: true }
+        };
+
+        const PATHS = {
+            "L1": ["حلوان", "عين حلوان", "جامعة حلوان", "وادي حوف", "حدائق حلوان", "المعصرة", "طرة الأسمنت", "كوتسيكا", "طرة البلد", "ثكنات المعادي", "المعادي", "حدائق المعادي", "دار السلام", "الزهراء", "مار جرجس", "الملك الصالح", "السيدة زينب", "سعد زغلول", "السادات", "جمال عبد الناصر", "عرابي", "الشهداء", "غمرة", "الدمرداش", "منشية الصدر", "كوبري القبة", "حمامات القبة", "سراي القبة", "حدائق الزيتون", "حلمية الزيتون", "المطرية", "عين شمس", "عزبة النخل", "المرج", "المرج الجديدة"],
+            "L2": ["المنيب", "ساقية مكي", "أم المصريين", "الجيزة", "فيصل", "جامعة القاهرة", "البحوث", "الدقي", "الأوبرا", "السادات", "محمد نجيب", "العتبة", "الشهداء", "مسرة", "روض الفرج", "سانت تريزا", "الخلفاوي", "المظلات", "كلية الزراعة", "شبرا الخيمة"],
+            "L3_1": ["عدلي منصور", "الهايكستب", "عمر بن الخطاب", "قباء", "هشام بركات", "النزهة", "نادي الشمس", "ألف مسكن", "هليوبوليس", "هارون", "الأهرام", "كلية البنات", "الاستاد", "أرض المعارض", "العباسية", "عبده باشا", "الجيش", "باب الشعرية", "العتبة", "جمال عبد الناصر", "ماسبيرو", "صفاء حجازي", "الكيت كات"],
+            "L3_2": ["الكيت كات", "السودان", "إمبابة", "البوهي", "القومية", "الطريق الدائري", "محور روض الفرج"],
+            "L3_3": ["الكيت كات", "التوفيقية", "وادي النيل", "جامعة الدول", "بولاق الدكرور", "جامعة القاهرة"],
+            "ME": ["الاستاد", "هشام بركات (المونوريل)", "جامعة الأزهر", "الحي السابع", "المشير أحمد إسماعيل", "جيهان السادات", "المشير طنطاوي", "وان ناينتي", "المستشفى الجوي", "النرجس", "المستثمرين", "اللوتس", "جولدن سكوير", "بيت الوطن", "مسجد الفتاح العليم", "الحي R1", "الحي R2", "حي المال والأعمال", "مدينة الفنون والثقافة", "الحي الحكومي", "مسجد مصر", "مدينة العدالة"],
+            "LRT_1": ["عدلي منصور", "العبور", "المستقبل", "الشروق", "هليوبوليس الجديدة", "بدر", "الروبيكي", "حدائق العاصمة", "مطار العاصمة", "مدينة الفنون والثقافة", "كاتدرائية الميلاد", "القيادة الاستراتيجية", "المدينة الرياضية الدولية", "العاصمة المركزية"],
+            "LRT_2": ["بدر", "المنطقة الصناعية", "مدينة المعرفة", "غرب العاشر", "العاشر من رمضان", "مركز المدينة"]
+        };
+
+        const ALIASES = {
+            "رمسيس": "الشهداء", "محطة مصر": "الشهداء",
+            "التحرير": "السادات", "مجمع التحرير": "السادات", "ميدان التحرير": "السادات",
+            "ناصر": "جمال عبد الناصر", "الاسعاف": "جمال عبد الناصر",
+            "الموسكي": "العتبة",
+            "معرض القاهرة": "أرض المعارض",
+            "الكيتكات": "الكيت كات",
+            "موقف العاشر": "عدلي منصور",
+            "أحمد عرابي": "عرابي",
+            "استاد القاهرة": "الاستاد", "استاد مدينة نصر": "الاستاد", "استاد نصر": "الاستاد",
+            "العدالة": "مدينة العدالة",
+            "الفنون والثقافة": "مدينة الفنون والثقافة",
+            "التسعين": "وان ناينتي",
+            "المال والأعمال": "حي المال والأعمال"
+        };
+
+        // محطات لا تزال قيد التشغيل التجريبي أو الإنشاء (ضمن خطوط تعمل أساسًا)
+        const PENDING_STATIONS = new Set([
+            "هشام بركات (المونوريل)", "جامعة الأزهر", "الحي السابع", "المشير أحمد إسماعيل", "جيهان السادات",
+            "كاتدرائية الميلاد", "القيادة الاستراتيجية", "المدينة الرياضية الدولية", "العاصمة المركزية",
+            "غرب العاشر", "العاشر من رمضان", "مركز المدينة"
+        ]);
+
+        // متوسط الدقائق بين كل محطتين متتاليتين، يختلف حسب نوع الخط
+        const PER_STATION_MIN = { L1: 2.2, L2: 2.2, L3: 2.2, ME: 3.2, LRT: 5.5 };
+        // وقت التحويل بين الخطوط بالدقائق (مشي + انتظار) — افتراضي 5 دقائق، مع حالات خاصة لمحطات معروفة بطول مسافة المشي بها
+        const INTERCHANGE_MIN = { "العتبة": 8, "السادات": 7, "جامعة القاهرة": 6, "عدلي منصور": 6, "مدينة الفنون والثقافة": 6, "الاستاد": 5 };
+        const DEFAULT_INTERCHANGE_MIN = 5;
+
+        /** --- 2. Graph Construction --- */
+        const graph = {};
+        const stationLines = {};
+
+        const addEdge = (s1, s2, lId) => {
+            if (!graph[s1]) graph[s1] = [];
+            if (!graph[s2]) graph[s2] = [];
+            if (!graph[s1].find(n => n.name === s2)) graph[s1].push({ name: s2, line: lId });
+            if (!graph[s2].find(n => n.name === s1)) graph[s2].push({ name: s1, line: lId });
+
+            if (!stationLines[s1]) stationLines[s1] = new Set();
+            if (!stationLines[s2]) stationLines[s2] = new Set();
+            stationLines[s1].add(lId); stationLines[s2].add(lId);
+        };
+
+        Object.entries(PATHS).forEach(([key, stations]) => {
+            let lId = key.split('_')[0];
+            for (let i = 0; i < stations.length - 1; i++) addEdge(stations[i], stations[i + 1], lId);
+        });
+
+        /** --- 3. Algorithms --- */
+        const stripDiacritics = (s) => s.replace(/[أإآ]/g, 'ا');
+
+        const normalize = (val) => {
+            let v = stripDiacritics(val.trim());
+            for (let [alias, real] of Object.entries(ALIASES)) {
+                let na = stripDiacritics(alias);
+                if (v.includes(na) || val.trim() === alias) return real;
+            }
+            return val.trim();
+        };
+
+        const bfs = (start, end) => {
+            if (start === end) return [start];
+            let q = [[start]], visited = new Set([start]);
+            while (q.length > 0) {
+                let path = q.shift(), curr = path[path.length - 1];
+                if (curr === end) return path;
+                for (let neighbor of graph[curr] || []) {
+                    if (!visited.has(neighbor.name)) {
+                        visited.add(neighbor.name);
+                        q.push([...path, neighbor.name]);
+                    }
+                }
+            }
+            return null;
+        };
+
+        const getRouteInstructions = (path) => {
+            let inst = [], curLine = null, curStart = path[0], stops = 0;
+            const getShared = (s1, s2) => Array.from(stationLines[s1]).find(l => stationLines[s2].has(l));
+
+            for (let i = 0; i < path.length - 1; i++) {
+                let line = getShared(path[i], path[i + 1]);
+                if (!curLine) curLine = line;
+                else if (curLine !== line) {
+                    inst.push({ type: 'ride', from: curStart, to: path[i], line: curLine, stops });
+                    inst.push({ type: 'interchange', station: path[i], fromL: curLine, toL: line });
+                    curLine = line; curStart = path[i]; stops = 0;
+                }
+                stops++;
+            }
+            inst.push({ type: 'ride', from: curStart, to: path[path.length - 1], line: curLine, stops });
+            return inst;
+        };
+
+        // حساب التذاكر: كل خط له نظام تذاكر مستقل (مترو / مونوريل / قطار خفيف)
+        function computeFare(insts) {
+            let metroStops = 0, monoStops = 0, hasLRT = false;
+            insts.forEach(i => {
+                if (i.type !== 'ride') return;
+                if (i.line === 'L1' || i.line === 'L2' || i.line === 'L3') metroStops += i.stops;
+                else if (i.line === 'ME') monoStops += i.stops;
+                else if (i.line === 'LRT') hasLRT = true;
+            });
+            let rows = [];
+            if (metroStops > 0) {
+                let v = metroStops <= 9 ? 10 : metroStops <= 16 ? 12 : metroStops <= 23 ? 15 : 20;
+                rows.push({ label: 'تذكرة المترو', value: `${v} ج.م`, hex: LINES.L1.hex });
+            }
+            if (monoStops > 0) {
+                let v = monoStops <= 5 ? 20 : monoStops <= 10 ? 40 : monoStops <= 15 ? 55 : 80;
+                rows.push({ label: 'تذكرة المونوريل', value: `${v} ج.م`, hex: LINES.ME.hex });
+            }
+            if (hasLRT) {
+                rows.push({ label: 'تذكرة القطار الخفيف', value: 'حسب المسافة', hex: LINES.LRT.hex });
+            }
+            if (rows.length === 0) rows.push({ label: 'التكلفة', value: '-', hex: '#94a3b8' });
+            return rows;
+        }
+
+        // حساب الوقت التقديري: وقت ركوب لكل محطة (يختلف حسب نوع الخط) + وقت تحويل بين الخطوط
+        function computeTime(insts) {
+            let total = 0;
+            insts.forEach(i => {
+                if (i.type === 'ride') total += i.stops * (PER_STATION_MIN[i.line] || 2.5);
+                else if (i.type === 'interchange') total += (INTERCHANGE_MIN[i.station] ?? DEFAULT_INTERCHANGE_MIN);
+            });
+            return Math.max(1, Math.round(total));
+        }
+
+        function hasPending(path) {
+            return path.some(s => PENDING_STATIONS.has(s));
+        }
+
+        /** --- 4. مكوّن البحث التلقائي عن المحطات --- */
+        function buildCombobox(input) {
+            const wrap = input.parentElement; // .input-wrapper (موضعه relative بالفعل)
+            const panel = document.createElement('div');
+            panel.className = 'combo-panel';
+            panel.setAttribute('role', 'listbox');
+            wrap.appendChild(panel);
+
+            const allStations = Object.keys(graph).sort((a, b) => a.localeCompare(b, 'ar'));
+            let activeIndex = -1, currentItems = [];
+
+            function lineDotsHTML(name) {
+                const ls = stationLines[name] ? Array.from(stationLines[name]) : [];
+                return ls.map(l => `<span class="combo-dot" style="background:${LINES[l].hex}"></span>`).join('');
+            }
+
+            function render(items) {
+                currentItems = items; activeIndex = -1;
+                if (!items.length) { panel.classList.remove('open'); panel.innerHTML = ''; return; }
+                panel.innerHTML = items.map((name, idx) => `
+                    <div class="combo-item" data-idx="${idx}" data-name="${name}" role="option">
+                        <span class="combo-dots">${lineDotsHTML(name)}</span>
+                        <span class="combo-label">${name}</span>
+                    </div>`).join('');
+                panel.classList.add('open');
+            }
+
+            function filter(q) {
+                q = stripDiacritics(q.trim());
+                if (!q) return [];
+                return allStations.filter(s => stripDiacritics(s).includes(q)).slice(0, 8);
+            }
+
+            function highlight() {
+                panel.querySelectorAll('.combo-item').forEach((el, i) => el.classList.toggle('active', i === activeIndex));
+                const el = panel.querySelector('.combo-item.active');
+                if (el) el.scrollIntoView({ block: 'nearest' });
+            }
+
+            function pick(name) {
+                input.value = name;
+                close();
+                input.dispatchEvent(new Event('change'));
+            }
+
+            function close() { panel.classList.remove('open'); panel.innerHTML = ''; activeIndex = -1; }
+
+            input.addEventListener('input', () => render(filter(input.value)));
+            input.addEventListener('focus', () => { if (input.value.trim()) render(filter(input.value)); });
+            input.addEventListener('keydown', (e) => {
+                if (!panel.classList.contains('open')) return;
+                if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, currentItems.length - 1); highlight(); }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); highlight(); }
+                else if (e.key === 'Enter') { if (activeIndex >= 0) { e.preventDefault(); pick(currentItems[activeIndex]); } }
+                else if (e.key === 'Escape') { close(); }
+            });
+            panel.addEventListener('mousedown', (e) => {
+                const item = e.target.closest('.combo-item');
+                if (item) { e.preventDefault(); pick(item.dataset.name); }
+            });
+            document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
+
+            return { close };
+        }
+
+        /** --- 5. الرحلات الأخيرة (محفوظة محليًا على الجهاز) --- */
+        const RECENTS_KEY = 'metro_recent_trips_v1';
+        function loadRecents() {
+            try { return JSON.parse(localStorage.getItem(RECENTS_KEY) || '[]'); } catch { return []; }
+        }
+        function saveRecent(from, to) {
+            let list = loadRecents().filter(r => !(r.from === from && r.to === to));
+            list.unshift({ from, to });
+            list = list.slice(0, 5);
+            try { localStorage.setItem(RECENTS_KEY, JSON.stringify(list)); } catch {}
+            renderRecents();
+        }
+        function renderRecents() {
+            const wrap = document.getElementById('recentChips');
+            const list = loadRecents();
+            if (!list.length) { wrap.innerHTML = ''; wrap.hidden = true; return; }
+            wrap.hidden = false;
+            wrap.innerHTML = '<span class="recent-label">الأخيرة:</span>' + list.map(r =>
+                `<button type="button" class="recent-chip" data-from="${r.from}" data-to="${r.to}">${r.from} ← ${r.to}</button>`
+            ).join('');
+        }
+
+        /** --- 6. واجهات التحكم --- */
+        // التنقل
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.target).classList.add('active');
+            });
+        });
+
+        const inStart = document.getElementById('inStart');
+        const inEnd = document.getElementById('inEnd');
+        const msgError = document.getElementById('msgError');
+        const panelRes = document.getElementById('panelResult');
+
+        buildCombobox(inStart);
+        buildCombobox(inEnd);
+
+        document.getElementById('btnSwap').addEventListener('click', () => {
+            [inStart.value, inEnd.value] = [inEnd.value, inStart.value];
+        });
+
+        const showError = (msg) => { msgError.textContent = msg; msgError.style.display = 'block'; };
+
+        function renderSummary(insts) {
+            const wrap = document.getElementById('summaryStrip');
+            wrap.innerHTML = insts.map(inst => {
+                if (inst.type === 'ride') {
+                    const L = LINES[inst.line];
+                    return `<div class="summary-seg" style="--seg-color:${L.hex}">
+                        <span class="summary-dot" style="background:${L.hex}"></span>
+                        <span>${inst.line}</span><span>·</span><span>${inst.stops}</span>
+                    </div>`;
+                }
+                return `<div class="summary-arrow">⇄</div>`;
+            }).join('');
+        }
+
+        document.getElementById('btnRoute').addEventListener('click', () => {
+            msgError.style.display = 'none';
+            panelRes.style.display = 'none';
+            document.getElementById('pendingNotice').hidden = true;
+
+            if (!inStart.value || !inEnd.value) return showError("من فضلك أدخل محطتي الانطلاق والوصول.");
+
+            let s = normalize(inStart.value), e = normalize(inEnd.value);
+            if (!graph[s]) return showError(`محطة "${inStart.value}" غير موجودة. تأكد من الاسم أو اخترها من القائمة.`);
+            if (!graph[e]) return showError(`محطة "${inEnd.value}" غير موجودة. تأكد من الاسم أو اخترها من القائمة.`);
+            if (s === e) return showError("أنت بالفعل في محطة الوصول!");
+
+            let path = bfs(s, e);
+            if (!path) return showError("تعذر العثور على مسار بين هاتين المحطتين.");
+
+            let insts = getRouteInstructions(path);
+            let stopsCount = path.length - 1;
+
+            // الإحصائيات
+            document.getElementById('outStops').innerHTML = `${stopsCount} <span style="font-weight:500; font-size:12px;">محطة</span>`;
+            document.getElementById('outTime').innerHTML = `~ ${computeTime(insts)} <span style="font-weight:500; font-size:12px;">دقيقة</span>`;
+
+            const fareRows = computeFare(insts);
+            const priceEl = document.getElementById('outPrice');
+            if (fareRows.length === 1) {
+                priceEl.classList.remove('multi');
+                priceEl.textContent = fareRows[0].value;
+            } else {
+                priceEl.classList.add('multi');
+                priceEl.innerHTML = fareRows.map(r => `<span class="fare-row"><i style="background:${r.hex}"></i>${r.value}</span>`).join('');
+            }
+
+            renderSummary(insts);
+            document.getElementById('pendingNotice').hidden = !hasPending(path);
+
+            // بناء التايم لاين
+            const tl = document.getElementById('outTimeline');
+            tl.innerHTML = '';
+
+            insts.forEach((inst, i) => {
+                let d = document.createElement('div');
+                d.className = 'tl-node';
+                d.style.animationDelay = `${i * 0.15}s`;
+
+                if (inst.type === 'ride') {
+                    let L = LINES[inst.line];
+                    d.innerHTML = `
+                        <div class="tl-marker" style="border-color:${L.hex}"></div>
+                        <div class="tl-box">
+                            <h4>${i === 0 ? 'البداية' : 'استكمال'} <span class="line-label" style="background:${L.hex}; color:${L.dark ? '#1a1a1a' : '#fff'}">${L.name}</span></h4>
+                            <p>اركب من <strong>${inst.from}</strong> ومر بـ ${inst.stops} محطات.</p>
+                        </div>`;
+                } else {
+                    let L = LINES[inst.toL];
+                    d.innerHTML = `
+                        <div class="tl-marker pulse" style="border-color:#ef4444; background:#ef4444"></div>
+                        <div class="tl-box" style="border-right: 3px solid #ef4444">
+                            <h4>تحويل مسار 🔄</h4>
+                            <p>انزل في <strong>${inst.station}</strong> وحول مسارك إلى <span style="color:${L.hex}; font-weight:700">${L.name}</span>.</p>
+                        </div>`;
+                }
+                tl.appendChild(d);
+            });
+
+            // العقدة الأخيرة
+            let final = document.createElement('div');
+            final.className = 'tl-node';
+            final.style.animationDelay = `${insts.length * 0.15}s`;
+            final.innerHTML = `
+                <div class="tl-marker" style="border-color:#10b981; background:#10b981"></div>
+                <div class="tl-box" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+                    <h4 style="color:#10b981">الوصول 🎯</h4>
+                    <p>وصولاً بالسلامة إلى <strong>${e}</strong>.</p>
+                </div>`;
+            tl.appendChild(final);
+
+            panelRes.style.display = 'block';
+            saveRecent(s, e);
+
+            if (navigator.vibrate) navigator.vibrate(50);
+
+            if (window.innerWidth < 768) {
+                setTimeout(() => panelRes.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+            }
+        });
+
+        document.getElementById('recentChips').addEventListener('click', (e) => {
+            const btn = e.target.closest('.recent-chip');
+            if (!btn) return;
+            inStart.value = btn.dataset.from;
+            inEnd.value = btn.dataset.to;
+            document.getElementById('btnRoute').click();
+        });
+
+        /** --- 7. بناء دليل الخطوط --- */
+        (function renderLinesGuide() {
+            const data = [
+                { key: 'L1', status: 'ok', note: 'يعمل بالكامل' },
+                { key: 'L2', status: 'ok', note: 'يعمل بالكامل' },
+                { key: 'L3', status: 'ok', note: 'يعمل بالكامل (٣ فروع: روض الفرج وجامعة القاهرة)' },
+                { key: 'ME', status: 'partial', note: '16 من 22 محطة تعمل الآن، والباقي قريبًا' },
+                { key: 'LRT', status: 'partial', note: 'الخط الرئيسي يعمل، وامتدادات العاصمة والعاشر من رمضان قيد التوسع' },
+            ];
+            const wrap = document.getElementById('linesGuide');
+            wrap.innerHTML = data.map(d => {
+                const L = LINES[d.key];
+                const badge = d.status === 'ok'
+                    ? `<span class="status-badge status-ok">✅ ${d.note}</span>`
+                    : `<span class="status-badge status-partial">🟡 ${d.note}</span>`;
+                return `<div class="line-card">
+                    <div class="line-dot" style="background:${L.hex};"></div>
+                    <div>
+                        <div class="line-card-name">${L.name}</div>
+                        <div class="line-card-sub">${L.sub}</div>
+                        <div style="margin-top:6px;">${badge}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        })();
+
+        /** --- 8. تطبيق ويب تقدمي: تثبيت + عمل بدون إنترنت --- */
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
+        }
+
+        let deferredInstallPrompt = null;
+        const installBtn = document.getElementById('installBtn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            installBtn.hidden = false;
+        });
+        installBtn.addEventListener('click', async () => {
+            if (!deferredInstallPrompt) return;
+            installBtn.hidden = true;
+            await deferredInstallPrompt.prompt();
+            deferredInstallPrompt = null;
+        });
+        window.addEventListener('appinstalled', () => { installBtn.hidden = true; });
+
+        (function iosInstallTip() {
+            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            const inStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            let dismissed = false;
+            try { dismissed = !!localStorage.getItem('metro_ios_tip_dismissed'); } catch {}
+            if (isIOS && !inStandalone && !dismissed) {
+                document.getElementById('iosTip').hidden = false;
+            }
+        })();
+        document.getElementById('iosTipClose').addEventListener('click', () => {
+            document.getElementById('iosTip').hidden = true;
+            try { localStorage.setItem('metro_ios_tip_dismissed', '1'); } catch {}
+        });
+
+        function updateNetStatus() {
+            const pill = document.getElementById('netPill');
+            if (navigator.onLine) { pill.textContent = '🟢 متصل'; pill.classList.remove('offline'); }
+            else { pill.textContent = '🔴 غير متصل'; pill.classList.add('offline'); }
+        }
+        window.addEventListener('online', updateNetStatus);
+        window.addEventListener('offline', updateNetStatus);
+        updateNetStatus();
+
+        renderRecents();
+    </script>
+</body>
+</html>
