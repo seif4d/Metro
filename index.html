@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030712">
+    <meta name="description" content="مترو القاهرة الذكي - المنصة التفاعلية الأحدث لتخطيط رحلاتك عبر شبكة النقل بالكامل (مترو، مونوريل، قطار كهربائي خفيف) بدون إنترنت وبحاسبة تذاكر ذكية.">
+    
+    <title>مترو القاهرة الذكي | رفيق رحلتك الرقمي</title>
+
+    <!-- الخطوط الممتازة -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================= المتغيرات وأنظمة الألوان ================= */
+        :root {
+            --bg-base: #030712;
+            --bg-surface: rgba(17, 24, 39, 0.6);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            
+            --brand-primary: #3b82f6;
+            --brand-primary-glow: rgba(59, 130, 246, 0.35);
+            --brand-success: #10b981;
+            
+            --l1: #0078D7;
+            --l2: #FFC107;
+            --l3: #00B259;
+            --mono: #9C27B0;
+            --lrt: #00BCD4;
+
+            --radius-xl: 32px;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* ================= التنسيقات العامة ================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* مؤثرات الخلفية النيونية الفاخرة */
+        .glow-orb {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--brand-primary-glow) 0%, transparent 70%);
+            filter: blur(60px);
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .orb-1 { top: -100px; right: -100px; }
+        .orb-2 { top: 60%; left: -200px; background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%); }
+
+        /* حاوية التصميم */
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ================= الهيدر وشريط التنقل ================= */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(3, 7, 18, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-glass);
+            transition: var(--transition);
+        }
+        header.scrolled {
+            background: rgba(3, 7, 18, 0.9);
+            border-bottom-color: rgba(255, 255, 255, 0.12);
+        }
+        .nav-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .logo span {
+            font-size: 24px;
+            -webkit-text-fill-color: initial;
+        }
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .nav-links a:hover {
+            color: var(--brand-primary);
+        }
+        .cta-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+            padding: 10px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cta-btn:hover {
+            background: var(--text-main);
+            color: var(--bg-base);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255,255,255,0.1);
+        }
+        .cta-btn-primary {
+            background: var(--brand-primary);
+            border-color: transparent;
+        }
+        .cta-btn-primary:hover {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 10px 25px var(--brand-primary-glow);
+        }
+
+        /* ================= قسم الهيرو (Hero Section) ================= */
+        .hero-section {
+            padding-top: 80px;
+            padding-bottom: 120px;
+            position: relative;
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .hero-badge {
+            align-self: flex-start;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            color: #60a5fa;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .hero-title {
+            font-size: 56px;
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-description {
+            font-size: 18px;
+            color: var(--text-muted);
+            line-height: 1.8;
+            max-width: 540px;
+        }
+        .hero-ctas {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        /* ================= محاكي التطبيق التفاعلي (Interactive Mockup) ================= */
+        .mockup-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        /* إطار هاتف ذكي فاخر بالـ CSS */
+        .phone-frame {
+            width: 320px;
+            height: 640px;
+            background: #090d16;
+            border: 12px solid #1f2937;
+            border-radius: 40px;
+            box-shadow: 0 25px 60px -15px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        /* النوتش أو الكاميرا الأمامية للآيفون */
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110px;
+            height: 25px;
+            background: #1f2937;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+        .phone-content {
+            flex: 1;
+            padding: 30px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            font-size: 11px;
+            overflow-y: auto;
+            background: radial-gradient(circle at 50% 0%, #111827 0%, #030712 100%);
+        }
+        .mock-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .mock-input-group {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: var(--radius-md);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .mock-input {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 8px;
+            color: #fff;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .mock-input span:first-child {
+            color: var(--text-muted);
+            font-size: 9px;
+        }
+        .mock-btn-calc {
+            background: var(--brand-primary);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: center;
+            font-size: 11px;
+        }
+        /* نتائج المحاكاة داخل الهاتف */
+        .mock-results {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            animation: fadeUp 0.3s ease;
+        }
+        .mock-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+        .mock-stat-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.04);
+            padding: 6px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .mock-stat-card span {
+            font-size: 8px;
+            color: var(--text-muted);
+            display: block;
+        }
+        .mock-stat-card strong {
+            font-size: 11px;
+            color: #fff;
+        }
+        .mock-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            padding-right: 12px;
+            margin-top: 4px;
+        }
+        .mock-timeline::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            right: 4px;
+            width: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+        .mock-tl-node {
+            position: relative;
+            font-size: 10px;
+        }
+        .mock-tl-node::before {
+            content: '';
+            position: absolute;
+            right: -11px;
+            top: 4px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--brand-primary);
+        }
+        .mock-interactive-banner {
+            text-align: center;
+            font-size: 10px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--brand-success);
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            font-weight: 700;
+        }
+
+        /* ================= الميزات الذكية (Features Section) ================= */
+        .features-section {
+            padding: 100px 0;
+            background: radial-gradient(circle at 50% 50%, rgba(17, 24, 39, 0.4) 0%, transparent 100%);
+            border-top: 1px solid var(--border-glass);
+            position: relative;
+        }
+        .section-header {
+            text-align: center;
+            max-width: 640px;
+            margin: 0 auto 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .section-header h2 {
+            font-size: 40px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .feature-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.15);
+            background: rgba(17, 24, 39, 0.8);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+        }
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-md);
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--brand-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .feature-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: currentColor;
+        }
+        .feature-card h3 {
+            font-size: 20px;
+            font-weight: 800;
+        }
+        .feature-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        /* ================= أداة تسعير تفاعلية (Interactive Tool Section) ================= */
+        .calculator-section {
+            padding: 100px 0;
+            border-top: 1px solid var(--border-glass);
+        }
+        .calc-panel {
+            background: linear-gradient(135deg, rgba(17, 25, 40, 0.8) 0%, rgba(10, 15, 28, 0.8) 100%);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+            padding: 48px;
+            box-shadow: var(--glass-shadow);
+        }
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .calc-ui {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .calc-slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+        }
+        .slider-header .counter {
+            font-family: var(--font-mono);
+            font-size: 24px;
+            color: var(--brand-primary);
+        }
+        /* شكل وتصميم الـ Slider لتجربة فاخرة */
+        .custom-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            transition: var(--transition);
+        }
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--brand-primary);
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--brand-primary-glow);
+            transition: var(--transition);
+        }
+        .custom-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        /* كروت عرض النتائج */
+        .calc-results {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .calc-result-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 24px 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: var(--transition);
+        }
+        .calc-result-card.active {
+            border-color: var(--brand-primary);
+            box-shadow: 0 10px 20px var(--brand-primary-glow);
+            transform: translateY(-4px);
+        }
+        .calc-result-card .line-tag {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .calc-result-card .fare-amount {
+            font-size: 28px;
+            font-weight: 900;
+            color: #fff;
+            font-family: var(--font-mono);
+        }
+
+        /* ================= قسم خطوط الشبكة (Transit Lines Grid) ================= */
+        .lines-showcase {
+            padding: 100px 0;
+            border-top: 1px solid var(--border-glass);
+        }
+        .lines-track {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+        .line-track-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            transition: var(--transition);
+        }
+        .line-track-card:hover {
+            background: rgba(255,255,255,0.04);
+            transform: translateY(-3px);
+        }
+        .line-bar {
+            width: 100%;
+            height: 6px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+        .line-track-card h4 {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .line-track-card p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ================= الأسئلة الشائعة (FAQ) ================= */
+        .faq-section {
+            padding: 100px 0;
+            border-top: 1px solid var(--border-glass);
+        }
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .faq-item {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        .faq-trigger {
+            width: 100%;
+            padding: 24px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            text-align: right;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .faq-chevron {
+            width: 24px;
+            height: 24px;
+            transition: var(--transition);
+            fill: currentColor;
+            color: var(--text-muted);
+        }
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: var(--transition);
+            padding: 0 24px;
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+        .faq-item.open .faq-content {
+            max-height: 200px;
+            padding-bottom: 24px;
+        }
+        .faq-item.open .faq-chevron {
+            transform: rotate(180deg);
+            color: var(--brand-primary);
+        }
+
+        /* ================= الفوتر والنداء الختامي ================= */
+        .footer-cta-section {
+            padding: 120px 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(59, 130, 246, 0.05) 100%);
+            border-top: 1px solid var(--border-glass);
+            text-align: center;
+            position: relative;
+        }
+        .footer-cta-card {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
+        }
+        .footer-cta-card h2 {
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            line-height: 1.2;
+        }
+
+        footer {
+            border-top: 1px solid var(--border-glass);
+            padding: 40px 0;
+            background: #020613;
+        }
+        .footer-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        .footer-copy {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ================= تأثيرات حركية (Scroll Reveal Effect) ================= */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ================= تجاوب التصميم (Responsive Rules) ================= */
+        @media (max-width: 1024px) {
+            .hero-title { font-size: 44px; }
+            .hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+            .hero-content { align-items: center; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .calc-grid { grid-template-columns: 1fr; gap: 40px; }
+            .lines-track { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .features-grid { grid-template-columns: 1fr; }
+            .calc-results { grid-template-columns: 1fr; }
+            .lines-track { grid-template-columns: repeat(2, 1fr); }
+            .footer-cta-card h2 { font-size: 34px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+
+    <!-- الهيدر شريط التنقل -->
+    <header id="header">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="#" class="logo"><span>🚇</span> مترو القاهرة الذكي</a>
+                <ul class="nav-links">
+                    <li><a href="#features">الميزات الذكية</a></li>
+                    <li><a href="#how-it-works">كيف يعمل؟</a></li>
+                    <li><a href="#fares">حاسبة التذاكر</a></li>
+                    <li><a href="#faq">الأسئلة الشائعة</a></li>
+                </ul>
+                <a href="./app.html" class="cta-btn cta-btn-primary">افتح التطبيق</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- قسم الهيرو الرئيسي -->
+        <section class="hero-section container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge">تحديثات يونيو 2026 الرسمية</div>
+                    <h1 class="hero-title">مستقبل النقل في القاهرة الكبرى، بين يديك.</h1>
+                    <p class="hero-description">
+                        المنصة الأكثر سلاسة لتخطيط رحلاتك بدقة متناهية. يدعم التطبيق بالكامل خطوط المترو الثلاثة، مونوريل شرق النيل، والقطار الكهربائي الخفيف (LRT) — كل ذلك بواجهة زجاجية مذهلة وتعمل بدون استهلاك باقة الإنترنت.
+                    </p>
+                    <div class="hero-ctas">
+                        <a href="./app.html" class="cta-btn cta-btn-primary">افتح التطبيق الآن (مجاني)</a>
+                        <a href="#how-it-works" class="cta-btn">شاهد طريقة العمل ↙</a>
+                    </div>
+                </div>
+
+                <!-- الهاتف التفاعلي -->
+                <div class="mockup-container">
+                    <div class="phone-frame">
+                        <div class="phone-notch"></div>
+                        <div class="phone-content">
+                            <div class="mock-topbar">
+                                <span>القاهرة 🚇</span>
+                                <span style="color: var(--brand-success)">🟢 متصل</span>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 10px;">
+                                <h4 style="font-weight: 800; font-size: 13px;">جرب التطبيق التفاعلي</h4>
+                                <p style="color: var(--text-muted); font-size: 9px; margin-top: 4px;">اضغط على زر المحاكاة بالأسفل لرؤية التخطيط الذكي</p>
+                            </div>
+
+                            <div class="mock-input-group">
+                                <div class="mock-input">
+                                    <span>من محطة:</span>
+                                    <strong id="mockStart">المرج الجديدة</strong>
+                                </div>
+                                <div class="mock-input">
+                                    <span>إلى محطة:</span>
+                                    <strong id="mockEnd">جامعة القاهرة</strong>
+                                </div>
+                            </div>
+
+                            <button class="mock-btn-calc" id="mockCalcBtn" type="button">ابدأ محاكاة الرحلة</button>
+
+                            <div class="mock-results" id="mockResults">
+                                <div class="mock-interactive-banner">تم العثور على المسار الأمثل!</div>
+                                <div class="mock-stats">
+                                    <div class="mock-stat-card">
+                                        <span>التكلفة</span>
+                                        <strong>12 ج.م</strong>
+                                    </div>
+                                    <div class="mock-stat-card">
+                                        <span>الوقت</span>
+                                        <strong>~ 45 د</strong>
+                                    </div>
+                                    <div class="mock-stat-card">
+                                        <span>المحطات</span>
+                                        <strong>22 محطة</strong>
+                                    </div>
+                                </div>
+                                <div class="mock-timeline">
+                                    <div class="mock-tl-node">اركب الخط الأول (المرج الجديدة)</div>
+                                    <div class="mock-tl-node" style="color: #ef4444;">حول في الشهداء للخط الثاني</div>
+                                    <div class="mock-tl-node">الوصول إلى (جامعة القاهرة)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم الميزات الذكية -->
+        <section id="features" class="features-section container reveal">
+            <div class="section-header">
+                <h2>أقوى محرك ملاحة لمواصلات العاصمة</h2>
+                <p>صُممت كل ميزة لتوفر لك تجربة تنقل يومية سلسة وخالية من المفاجآت، تماماً كالتطبيقات العالمية الكبرى.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <!-- أيقونة الموقع / الملاحة -->
+                        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                    </div>
+                    <h3>ملاحة دايجسترا الذكية</h3>
+                    <p>خوارزمية ذكية تتفهم مجهود التحويل بين الخطوط وتحسب أسرع الطرق بدقة مع تجنب التحويلات المجهدة في المحطات المزدحمة.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="color: var(--brand-success); background: rgba(16, 185, 129, 0.1);">
+                        <!-- أيقونة عدم الاتصال -->
+                        <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg>
+                    </div>
+                    <h3>يعمل بالكامل دون إنترنت</h3>
+                    <p>لا تفقد الاتصال بمسارك أبداً أثناء وجودك داخل أنفاق المترو تحت الأرض. كافة البيانات مدمجة وتعمل فورياً دون اتصال.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="color: #fbbf24; background: rgba(245, 158, 11, 0.1);">
+                        <!-- أيقونة التذكرة -->
+                        <svg viewBox="0 0 24 24"><path d="M22 10V6c0-1.11-.9-2-2-2H4c-1.1 0-1.99.89-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2zm-9 7.5h-2v-2h2v2zm0-4.5h-2v-2h2v2zm0-4.5h-2V6.5h2v2z"/></svg>
+                    </div>
+                    <h3>حاسبة تذاكر فورية ومحدثة</h3>
+                    <p>احسب تكلفة رحلتك مسبقاً بناءً على هيكلة أسعار 2026 الرسمية للمترو، المونوريل، والقطار الكهربائي الخفيف بالقرش.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم الأداة التفاعلية (حاسبة التذاكر الذكية لعام 2026) -->
+        <section id="fares" class="calculator-section container reveal">
+            <div class="calc-panel">
+                <div class="calc-grid">
+                    <div>
+                        <h2 style="font-size: 36px; font-weight: 900; margin-bottom: 20px;">حاسبة التذاكر التفاعلية لعام 2026</h2>
+                        <p style="color: var(--text-muted); line-height: 1.8; margin-bottom: 24px;">
+                            حرك شريط التمرير لاختيار عدد المحطات التي ستقوم بعبورها في رحلتك، وسيقوم محرك التسعير الذكي بحساب وتحديث قيمة التذكرة لجميع وسائل المواصلات المختلفة فوراً.
+                        </p>
+                        <div class="calc-ui">
+                            <div class="calc-slider-group">
+                                <div class="slider-header">
+                                    <span>عدد المحطات المخططة:</span>
+                                    <span class="counter" id="stationCount">10 محطات</span>
+                                </div>
+                                <input type="range" min="1" max="30" value="10" class="custom-slider" id="stationSlider">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- نتائج الحاسبة التفاعلية -->
+                    <div class="calc-results">
+                        <div class="calc-result-card" id="cardMetro">
+                            <span class="line-tag" style="color: var(--l1)">مترو القاهرة</span>
+                            <span class="fare-amount" id="fareMetro">12 ج.م</span>
+                            <span style="font-size: 12px; color: var(--text-muted)">شريحة 10-16 محطة</span>
+                        </div>
+                        <div class="calc-result-card" id="cardMono">
+                            <span class="line-tag" style="color: var(--mono)">مونوريل شرق النيل</span>
+                            <span class="fare-amount" id="fareMono">40 ج.م</span>
+                            <span style="font-size: 12px; color: var(--text-muted)">شريحة 6-10 محطات</span>
+                        </div>
+                        <div class="calc-result-card" id="cardLRT">
+                            <span class="line-tag" style="color: var(--lrt)">القطار الخفيف LRT</span>
+                            <span class="fare-amount" id="fareLRT">20 ج.م</span>
+                            <span style="font-size: 12px; color: var(--text-muted)">أكثر من 7 محطات</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم عرض الشبكات والخطوط المضيئة -->
+        <section class="lines-showcase container reveal">
+            <div class="section-header">
+                <h2>الشبكة الكاملة تحت مظلة واحدة</h2>
+                <p>لا تتشتت بين تطبيقات وخرائط مختلفة، قمنا بربط وتغطية كافة خطوط ومواصلات القاهرة الكبرى الرسمية.</p>
+            </div>
+            <div class="lines-track">
+                <div class="line-track-card">
+                    <div class="line-bar" style="background: var(--l1)"></div>
+                    <h4>الخط الأول</h4>
+                    <p>حلوان ↔ المرج الجديدة</p>
+                </div>
+                <div class="line-track-card">
+                    <div class="line-bar" style="background: var(--l2)"></div>
+                    <h4>الخط الثاني</h4>
+                    <p>المنيب ↔ شبرا الخيمة</p>
+                </div>
+                <div class="line-track-card">
+                    <div class="line-bar" style="background: var(--l3)"></div>
+                    <h4>الخط الثالث</h4>
+                    <p>عدلي منصور ↔ الجيزة/روض الفرج</p>
+                </div>
+                <div class="line-track-card">
+                    <div class="line-bar" style="background: var(--mono)"></div>
+                    <h4>مونوريل شرق النيل</h4>
+                    <p>الاستاد ↔ العاصمة الإدارية</p>
+                </div>
+                <div class="line-track-card">
+                    <div class="line-bar" style="background: var(--lrt)"></div>
+                    <h4>القطار الكهربائي LRT</h4>
+                    <p>عدلي منصور ↔ العاصمة/العاشر</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم الأسئلة الشائعة -->
+        <section id="faq" class="faq-section container reveal">
+            <div class="section-header">
+                <h2>الأسئلة الشائعة والتقنية</h2>
+                <p>كل ما تحتاج لمعرفته حول كيفية عمل التطبيق التقني المتقدم.</p>
+            </div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-trigger">
+                        <span>ما هو الـ PWA وكيف يمكنني تثبيت التطبيق؟</span>
+                        <svg class="faq-chevron" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+                    </button>
+                    <div class="faq-content">
+                        التطبيق يعمل كـ Progressive Web App، مما يعني أنه لا يتطلب التحميل من المتاجر التقليدية. بمجرد فتح التطبيق، يمكنك الضغط على "تثبيت" أو "إضافة للشاشة الرئيسية" ليعمل كتطبيق أصلي ومباشر على هاتفك.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-trigger">
+                        <span>كيف يمكن للتطبيق العمل بدون إنترنت بالكامل؟</span>
+                        <svg class="faq-chevron" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+                    </button>
+                    <div class="faq-content">
+                        يتم تخزين كافة خطوط ومحطات المترو والأسعار محلياً داخل جهازك (بواسطة ملفات الـ Service Worker). عند تصفحك للتطبيق أو حساب مسار رحلتك، تتم العمليات الحسابية بالكامل محلياً على هاتفك دون استهلاك الباقة.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-trigger">
+                        <span>هل يتم تحديث أسعار التذاكر باستمرار؟</span>
+                        <svg class="faq-chevron" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+                    </button>
+                    <div class="faq-content">
+                        نعم، قاعدة بياناتنا محدثة لتوافق قرارات وتحديثات وزارة النقل والهيئة القومية لمترو الأنفاق لعام 2026. بمجرد توفر اتصال بالشبكة، يقوم التطبيق بتحديث نفسه تلقائياً في الخلفية.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- النداء الختامي للعمل -->
+        <section class="footer-cta-section">
+            <div class="footer-cta-card container">
+                <h2>ابدأ التخطيط لرحلتك القادمة الآن مجاناً</h2>
+                <p style="color: var(--text-muted); max-width: 600px; font-size: 18px;">
+                    انضم لآلاف الركاب اليوميين الذين يعتمدون على تطبيق مترو القاهرة الذكي لتوفير الوقت والجهد وتجنب تشتت الملاحة اليومي.
+                </p>
+                <a href="./app.html" class="cta-btn cta-btn-primary" style="padding: 16px 40px; font-size: 18px;">افتح واجهة التطبيق فوراً</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- الفوتر الختامي -->
+    <footer>
+        <div class="container footer-grid">
+            <a href="#" class="logo">🚇 مترو القاهرة الذكي</a>
+            <div class="footer-copy">
+                &copy; ٢٠٢٦ تطبيق مترو القاهرة الذكي. صنع بحب وشغف في مصر لcommuters العاصمة.
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================= الـ JavaScript التفاعلي والذكي ================= -->
+    <script>
+        // تأثير الهيدر عند التمرير لأسفل
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // تشغيل محاكي الهاتف التفاعلي
+        const mockCalcBtn = document.getElementById('mockCalcBtn');
+        const mockResults = document.getElementById('mockResults');
+        mockCalcBtn.addEventListener('click', () => {
+            mockResults.style.display = 'flex';
+            mockCalcBtn.textContent = 'تم التخطيط بنجاح ✓';
+            mockCalcBtn.style.background = 'var(--brand-success)';
+        });
+
+        // منطق حاسبة التذاكر التفاعلية لعام 2026
+        const slider = document.getElementById('stationSlider');
+        const counter = document.getElementById('stationCount');
+        
+        const fareMetroEl = document.getElementById('fareMetro');
+        const fareMonoEl = document.getElementById('fareMono');
+        const fareLRTEl = document.getElementById('fareLRT');
+
+        const cardMetro = document.getElementById('cardMetro');
+        const cardMono = document.getElementById('cardMono');
+        const cardLRT = document.getElementById('cardLRT');
+
+        function updateFares(stations) {
+            counter.textContent = `${stations} محطة`;
+
+            // 1. حساب تسعيرة المترو الرسمية لعام 2026
+            let fareMetro = 20;
+            let metroDesc = "أكثر من 23 محطة";
+            if (stations <= 9) { fareMetro = 10; metroDesc = "شريحة 1-9 محطات"; }
+            else if (stations <= 16) { fareMetro = 12; metroDesc = "شريحة 10-16 محطة"; }
+            else if (stations <= 23) { fareMetro = 15; metroDesc = "شريحة 17-23 محطة"; }
+            
+            fareMetroEl.textContent = `${fareMetro} ج.م`;
+            cardMetro.querySelector('span:last-child').textContent = metroDesc;
+
+            // 2. حساب تسعيرة المونوريل لعام 2026
+            let fareMono = 80;
+            let monoDesc = "أكثر من 15 محطة";
+            if (stations <= 5) { fareMono = 20; monoDesc = "شريحة 1-5 محطات"; }
+            else if (stations <= 10) { fareMono = 40; monoDesc = "شريحة 6-10 محطات"; }
+            else if (stations <= 15) { fareMono = 55; monoDesc = "شريحة 11-15 محطة"; }
+
+            fareMonoEl.textContent = `${fareMono} ج.م`;
+            cardMono.querySelector('span:last-child').textContent = monoDesc;
+
+            // 3. حساب تسعيرة القطار الخفيف LRT لعام 2026
+            let fareLRT = 20;
+            let lrtDesc = "أكثر من 7 محطات";
+            if (stations <= 3) { fareLRT = 10; lrtDesc = "شريحة حتى 3 محطات"; }
+            else if (stations <= 7) { fareLRT = 15; lrtDesc = "شريحة حتى 7 محطات"; }
+
+            fareLRTEl.textContent = `${fareLRT} ج.م`;
+            cardLRT.querySelector('span:last-child').textContent = lrtDesc;
+        }
+
+        slider.addEventListener('input', (e) => {
+            updateFares(e.target.value);
+        });
+
+        // حركة تفاعلية لكروت الأسعار عند التفاعل
+        [cardMetro, cardMono, cardLRT].forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('active');
+            });
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('active');
+            });
+        });
+
+        // منطق الأسئلة الشائعة الأكورديون (FAQ Accordion)
+        document.querySelectorAll('.faq-trigger').forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const item = trigger.parentElement;
+                const isOpen = item.classList.contains('open');
+                
+                // إغلاق أي نافذة مفتوحة مسبقاً
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+                
+                if (!isOpen) {
+                    item.classList.add('open');
+                }
+            });
+        });
+
+        // مؤثرات الحركات التدريجية الفاخرة عند النزول بالصفحة (Scroll Reveal)
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); // تشغيل الحركة لمرة واحدة فقط لسرعة الأداء
+                }
+            });
+        }, {
+            threshold: 0.15
+        });
+
+        revealElements.forEach(el => revealObserver.observe(el));
+    </script>
+</body>
+</html>
