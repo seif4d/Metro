@@ -373,14 +373,14 @@
                             <div style="position: relative;">
                                 <div class="input-wrapper">
                                     <label for="inStart">منين؟ (محطة الانطلاق)</label>
-                                    <input type="text" id="inStart" class="input-field" placeholder="مثال: المرج الجديدة" autocomplete="off">
+                                    <input type="text" id="inStart" class="input-field" placeholder="مثال: المرج الجديدة" autocomplete="off" aria-autocomplete="list" aria-controls="inStart-panel">
                                 </div>
 
                                 <button class="swap-btn" id="btnSwap" aria-label="تبديل المحطتين" type="button">⇅</button>
 
                                 <div class="input-wrapper" style="margin-bottom: 20px;">
                                     <label for="inEnd">رايح فين؟ (محطة الوصول)</label>
-                                    <input type="text" id="inEnd" class="input-field" placeholder="مثال: جامعة القاهرة" autocomplete="off">
+                                    <input type="text" id="inEnd" class="input-field" placeholder="مثال: جامعة القاهرة" autocomplete="off" aria-autocomplete="list" aria-controls="inEnd-panel">
                                 </div>
                             </div>
 
@@ -475,9 +475,22 @@
                                     <span class="ticket-badge" style="background: #6A1B9A; color:white;">80 ج.م</span>
                                 </div>
                             </div>
-                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 16px; line-height: 1.7;">
-                                💡 تذكرة القطار الكهربائي الخفيف (LRT) تُحدَّد حسب المسافة عبر شباك التذاكر، ولا تتوفر بيانات تعريفة موحّدة ومؤكدة لكل المحطات بعد — يفضّل مراجعتها مباشرة قبل السفر.
-                            </p>
+
+                            <h3 style="margin: 24px 0 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">تذاكر القطار الكهربائي الخفيف (LRT)</h3>
+                            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                                    <span style="font-weight: 600;">حتى 3 محطات</span>
+                                    <span class="ticket-badge" style="background: #80DEEA;">10 ج.م</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                                    <span style="font-weight: 600;">حتى 7 محطات</span>
+                                    <span class="ticket-badge" style="background: #26C6DA; color:white;">15 ج.م</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600;">أكثر من 7 محطات</span>
+                                    <span class="ticket-badge" style="background: #0097A7; color:white;">20 ج.م</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- كارت آخر التحديثات -->
@@ -568,16 +581,16 @@
             "المال والأعمال": "حي المال والأعمال"
         };
 
-        // محطات لا تزال قيد التشغيل التجريبي أو الإنشاء (ضمن خطوط تعمل أساسًا)
+        // محطات لا تزال قيد التشغيل التجريبي أو الإنشاء
         const PENDING_STATIONS = new Set([
             "هشام بركات (المونوريل)", "جامعة الأزهر", "الحي السابع", "المشير أحمد إسماعيل", "جيهان السادات",
             "كاتدرائية الميلاد", "القيادة الاستراتيجية", "المدينة الرياضية الدولية", "العاصمة المركزية",
             "غرب العاشر", "العاشر من رمضان", "مركز المدينة"
         ]);
 
-        // متوسط الدقائق بين كل محطتين متتاليتين، يختلف حسب نوع الخط
+        // متوسط الدقائق بين كل محطتين متتاليتين
         const PER_STATION_MIN = { L1: 2.2, L2: 2.2, L3: 2.2, ME: 3.2, LRT: 5.5 };
-        // وقت التحويل بين الخطوط بالدقائق (مشي + انتظار) — افتراضي 5 دقائق، مع حالات خاصة لمحطات معروفة بطول مسافة المشي بها
+        // وقت التحويل الفعلي والانتظار بين الخطوط بالدقائق
         const INTERCHANGE_MIN = { "العتبة": 8, "السادات": 7, "جامعة القاهرة": 6, "عدلي منصور": 6, "مدينة الفنون والثقافة": 6, "الاستاد": 5 };
         const DEFAULT_INTERCHANGE_MIN = 5;
 
@@ -601,28 +614,77 @@
             for (let i = 0; i < stations.length - 1; i++) addEdge(stations[i], stations[i + 1], lId);
         });
 
-        /** --- 3. Algorithms --- */
-        const stripDiacritics = (s) => s.replace(/[أإآ]/g, 'ا');
+        /** --- 3. Algorithms & Text Processing --- */
+        // إزالة التشكيل وتوحيد الحروف المتشابهة لتجربة بحث فائقة المرونة
+        const stripDiacritics = (s) => {
+            if (!s) return "";
+            return s
+                .trim()
+                .replace(/[أإآأ]/g, 'ا')
+                .replace(/ة/g, 'ه')
+                .replace(/[ىي]/g, 'ي')
+                .replace(/[\u064B-\u065F]/g, ''); // حذف علامات التشكيل
+        };
 
         const normalize = (val) => {
-            let v = stripDiacritics(val.trim());
+            if (!val) return "";
+            let v = stripDiacritics(val);
+            // 1. فحص الأسماء المستعارة (Aliases) أولاً
             for (let [alias, real] of Object.entries(ALIASES)) {
                 let na = stripDiacritics(alias);
-                if (v.includes(na) || val.trim() === alias) return real;
+                if (v === na || v.includes(na)) return real;
+            }
+            // 2. فحص المطابقة المباشرة بعد المعالجة لجميع المحطات المسجلة بالرسم البياني
+            for (let station of Object.keys(graph)) {
+                if (stripDiacritics(station) === v) return station;
             }
             return val.trim();
         };
 
-        const bfs = (start, end) => {
+        // خوارزمية دايجسترا الذكية مع فرض "عقوبة تحويل" لمنع عمليات التبديل غير المريحة
+        const dijkstra = (start, end) => {
             if (start === end) return [start];
-            let q = [[start]], visited = new Set([start]);
-            while (q.length > 0) {
-                let path = q.shift(), curr = path[path.length - 1];
-                if (curr === end) return path;
-                for (let neighbor of graph[curr] || []) {
-                    if (!visited.has(neighbor.name)) {
-                        visited.add(neighbor.name);
-                        q.push([...path, neighbor.name]);
+            const dist = {};
+            const queue = [];
+
+            dist[start] = { cost: 0, path: [start], lastLine: null };
+            queue.push({ node: start, cost: 0 });
+
+            while (queue.length > 0) {
+                // ترتيب الطابور للحصول على العقدة الأقل تكلفة (Priority Queue)
+                queue.sort((a, b) => a.cost - b.cost);
+                const { node, cost } = queue.shift();
+
+                if (node === end) {
+                    return dist[end].path;
+                }
+
+                if (cost > dist[node].cost) continue;
+
+                const neighbors = graph[node] || [];
+                for (const neighbor of neighbors) {
+                    const nextNode = neighbor.name;
+                    const edgeLine = neighbor.line;
+                    const currentInfo = dist[node];
+
+                    // تكلفة ركوب المحطة العادية هي 1 (وزن افتراضي)
+                    let stepCost = 1;
+
+                    // في حال تبديل الخط، يتم فرض عقوبة بمقدار 12 "وزن افتراضي"
+                    // لضمان عدم توجيه المستخدم لخطوط متعددة إلا في الضرورة القصوى
+                    if (currentInfo.lastLine && currentInfo.lastLine !== edgeLine) {
+                        stepCost += 12; 
+                    }
+
+                    const totalCost = currentInfo.cost + stepCost;
+
+                    if (!dist[nextNode] || totalCost < dist[nextNode].cost) {
+                        dist[nextNode] = {
+                            cost: totalCost,
+                            path: [...currentInfo.path, nextNode],
+                            lastLine: edgeLine
+                        };
+                        queue.push({ node: nextNode, cost: totalCost });
                     }
                 }
             }
@@ -647,14 +709,14 @@
             return inst;
         };
 
-        // حساب التذاكر: كل خط له نظام تذاكر مستقل (مترو / مونوريل / قطار خفيف)
+        // حساب التكلفة الكلية للرحلة بناء على عدد محطات كل وسيلة
         function computeFare(insts) {
-            let metroStops = 0, monoStops = 0, hasLRT = false;
+            let metroStops = 0, monoStops = 0, lrtStops = 0;
             insts.forEach(i => {
                 if (i.type !== 'ride') return;
                 if (i.line === 'L1' || i.line === 'L2' || i.line === 'L3') metroStops += i.stops;
                 else if (i.line === 'ME') monoStops += i.stops;
-                else if (i.line === 'LRT') hasLRT = true;
+                else if (i.line === 'LRT') lrtStops += i.stops;
             });
             let rows = [];
             if (metroStops > 0) {
@@ -665,14 +727,16 @@
                 let v = monoStops <= 5 ? 20 : monoStops <= 10 ? 40 : monoStops <= 15 ? 55 : 80;
                 rows.push({ label: 'تذكرة المونوريل', value: `${v} ج.م`, hex: LINES.ME.hex });
             }
-            if (hasLRT) {
-                rows.push({ label: 'تذكرة القطار الخفيف', value: 'حسب المسافة', hex: LINES.LRT.hex });
+            if (lrtStops > 0) {
+                // حساب تعرفة الـ LRT تلقائياً وفقاً للشرائح الرسمية المحدثة
+                let v = lrtStops <= 3 ? 10 : lrtStops <= 7 ? 15 : 20;
+                rows.push({ label: 'تذكرة القطار الخفيف', value: `${v} ج.م`, hex: LINES.LRT.hex });
             }
             if (rows.length === 0) rows.push({ label: 'التكلفة', value: '-', hex: '#94a3b8' });
             return rows;
         }
 
-        // حساب الوقت التقديري: وقت ركوب لكل محطة (يختلف حسب نوع الخط) + وقت تحويل بين الخطوط
+        // حساب الوقت التقديري
         function computeTime(insts) {
             let total = 0;
             insts.forEach(i => {
@@ -686,11 +750,12 @@
             return path.some(s => PENDING_STATIONS.has(s));
         }
 
-        /** --- 4. مكوّن البحث التلقائي عن المحطات --- */
+        /** --- 4. مكوّن البحث التلقائي عن المحطات (Combobox) --- */
         function buildCombobox(input) {
-            const wrap = input.parentElement; // .input-wrapper (موضعه relative بالفعل)
+            const wrap = input.parentElement;
             const panel = document.createElement('div');
             panel.className = 'combo-panel';
+            panel.id = input.getAttribute('aria-controls');
             panel.setAttribute('role', 'listbox');
             wrap.appendChild(panel);
 
@@ -704,13 +769,14 @@
 
             function render(items) {
                 currentItems = items; activeIndex = -1;
-                if (!items.length) { panel.classList.remove('open'); panel.innerHTML = ''; return; }
+                if (!items.length) { panel.classList.remove('open'); input.setAttribute('aria-expanded', 'false'); panel.innerHTML = ''; return; }
                 panel.innerHTML = items.map((name, idx) => `
-                    <div class="combo-item" data-idx="${idx}" data-name="${name}" role="option">
+                    <div class="combo-item" id="opt-${input.id}-${idx}" data-idx="${idx}" data-name="${name}" role="option" aria-selected="false">
                         <span class="combo-dots">${lineDotsHTML(name)}</span>
                         <span class="combo-label">${name}</span>
                     </div>`).join('');
                 panel.classList.add('open');
+                input.setAttribute('aria-expanded', 'true');
             }
 
             function filter(q) {
@@ -720,7 +786,15 @@
             }
 
             function highlight() {
-                panel.querySelectorAll('.combo-item').forEach((el, i) => el.classList.toggle('active', i === activeIndex));
+                const items = panel.querySelectorAll('.combo-item');
+                items.forEach((el, i) => {
+                    const active = i === activeIndex;
+                    el.classList.toggle('active', active);
+                    el.setAttribute('aria-selected', active ? 'true' : 'false');
+                    if (active) {
+                        input.setAttribute('aria-activedescendant', el.id);
+                    }
+                });
                 const el = panel.querySelector('.combo-item.active');
                 if (el) el.scrollIntoView({ block: 'nearest' });
             }
@@ -731,7 +805,13 @@
                 input.dispatchEvent(new Event('change'));
             }
 
-            function close() { panel.classList.remove('open'); panel.innerHTML = ''; activeIndex = -1; }
+            function close() { 
+                panel.classList.remove('open'); 
+                input.setAttribute('aria-expanded', 'false');
+                input.removeAttribute('aria-activedescendant');
+                panel.innerHTML = ''; 
+                activeIndex = -1; 
+            }
 
             input.addEventListener('input', () => render(filter(input.value)));
             input.addEventListener('focus', () => { if (input.value.trim()) render(filter(input.value)); });
@@ -774,7 +854,7 @@
         }
 
         /** --- 6. واجهات التحكم --- */
-        // التنقل
+        // التنقل بين الأقسام
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -794,6 +874,8 @@
 
         document.getElementById('btnSwap').addEventListener('click', () => {
             [inStart.value, inEnd.value] = [inEnd.value, inStart.value];
+            // غلق أي لوحة مقترحات نشطة عند استخدام زر التبديل لتفادي المشاكل البصرية
+            document.querySelectorAll('.combo-panel').forEach(panel => panel.classList.remove('open'));
         });
 
         const showError = (msg) => { msgError.textContent = msg; msgError.style.display = 'block'; };
@@ -824,13 +906,14 @@
             if (!graph[e]) return showError(`محطة "${inEnd.value}" غير موجودة. تأكد من الاسم أو اخترها من القائمة.`);
             if (s === e) return showError("أنت بالفعل في محطة الوصول!");
 
-            let path = bfs(s, e);
+            // استخدام دايجسترا المطور للوصول لأفضل مسار مريح وخالٍ من التحويلات الكثيرة
+            let path = dijkstra(s, e);
             if (!path) return showError("تعذر العثور على مسار بين هاتين المحطتين.");
 
             let insts = getRouteInstructions(path);
             let stopsCount = path.length - 1;
 
-            // الإحصائيات
+            // تحديث الإحصائيات الفورية
             document.getElementById('outStops').innerHTML = `${stopsCount} <span style="font-weight:500; font-size:12px;">محطة</span>`;
             document.getElementById('outTime').innerHTML = `~ ${computeTime(insts)} <span style="font-weight:500; font-size:12px;">دقيقة</span>`;
 
@@ -847,7 +930,7 @@
             renderSummary(insts);
             document.getElementById('pendingNotice').hidden = !hasPending(path);
 
-            // بناء التايم لاين
+            // بناء التايم لاين للرحلة
             const tl = document.getElementById('outTimeline');
             tl.innerHTML = '';
 
@@ -876,7 +959,7 @@
                 tl.appendChild(d);
             });
 
-            // العقدة الأخيرة
+            // محطة النهاية والوصول
             let final = document.createElement('div');
             final.className = 'tl-node';
             final.style.animationDelay = `${insts.length * 0.15}s`;
@@ -906,7 +989,7 @@
             document.getElementById('btnRoute').click();
         });
 
-        /** --- 7. بناء دليل الخطوط --- */
+        /** --- 7. بناء دليل الخطوط تلقائياً --- */
         (function renderLinesGuide() {
             const data = [
                 { key: 'L1', status: 'ok', note: 'يعمل بالكامل' },
@@ -932,7 +1015,7 @@
             }).join('');
         })();
 
-        /** --- 8. تطبيق ويب تقدمي: تثبيت + عمل بدون إنترنت --- */
+        /** --- 8. تطبيق ويب تقدمي (PWA): تثبيت + عمل بدون إنترنت --- */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(() => {});
