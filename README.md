@@ -1,148 +1,136 @@
 <div align="center">
 
 # 🚇 Cairo Metro Smart Guide
+**دليل مترو القاهرة الذكي — أسرع، أذكى، وبدون إنترنت.**
 
-### دليلك الرقمي السلس لشبكة مواصلات القاهرة الكبرى.. أوفلاين، وبدون إعلانات.
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](#)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](#)
+[![JavaScript](https://img.shields.io/badge/Vanilla_JS-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](#)
+[![PWA](https://img.shields.io/badge/PWA_Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](#)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-<p align="center">
-  <a href="#-جولة-سريعة-tldr">الـ TL;DR</a> •
-  <a href="#-الميزات-الرئيسية">الميزات</a> •
-  <a href="#-الجانب-التقني-under-the-hood">الجانب التقني</a> •
-  <a href="#-التشغيل-المحلي">التشغيل المحلي</a> •
-  <a href="#-خريطة-الطريق-roadmap">خريطة الطريق</a>
-</p>
+[Live Demo (رابط التطبيق)](#) • [Report Bug (الإبلاغ عن مشكلة)](https://github.com/seif4d/Metro/issues) • [Request Feature (طلب ميزة)](https://github.com/seif4d/Metro/issues)
 
-[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
-[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![PWA Ready](https://img.shields.io/badge/PWA-Ready-success?style=flat-square&logo=progressive-web-apps&logoColor=white)](#-تطبيق-ويب-تقدمي-pWA)
-[![UI Style](https://img.shields.io/badge/UI-Glassmorphism-blueviolet?style=flat-square)](#)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](./LICENSE)
-
----
-
-**[⚡ جرب التطبيق الآن مجاناً]** | **[🐞 بلّغ عن مشكلة أو اقترح ميزة]**
+<img src="https://via.placeholder.com/800x400/060913/3b82f6?text=Metro+App+Screenshot+Here" alt="Metro App UI Preview" style="border-radius: 12px; margin-top: 20px;">
 
 </div>
 
 ---
 
-## ⚡ جولة سريعة (TL;DR)
-
-مترو القاهرة يتوسع بسرعة، والوصول لوجهتك لم يعد يقتصر على الخطوط الثلاثة التقليدية بل أصبح يشمل المونوريل والقطار الكهربائي الخفيف (LRT). 
-هذا التطبيق هو **SPA (تطبيق الصفحة الواحدة)** خفيف جداً، مصمم بأسلوب زجاجي عصري (Glassmorphism) لحل مشكلة التنقل اليومية:
-- **بلا إنترنت؟** يعمل بالكامل أوفلاين بفضل الـ Service Worker.
-- **بلا إعلانات؟** كود نظيف مفتوح المصدر 100% بدون أي تتبع أو إعلانات منبثقة.
-- **كيف يصل؟** يستخدم خوارزمية ذكية لاختيار أقصر طريق مريح بأقل عدد تحويلات ممكن.
+## ⚡ TL;DR (الخلاصة)
+تطبيق ويب تقدمي (PWA) خفيف جداً ومبني بالكامل بـ **Vanilla Web Tech** (بدون فريم وورك). بيحسبلك أفضل مسار، الوقت، التكلفة، وعدد المحطات جوا شبكة النقل في القاهرة (المترو، المونوريل، والقطار الخفيف LRT). الأهم؟ **بيشتغل Offline تماماً** عشان لو مفيش شبكة تحت الأرض. 🚇🚫📶
 
 ---
 
-## 🚀 الميزات الرئيسية
+## 🔥 ليه التطبيق ده مختلف؟ (Features)
 
-<details>
-<summary><b>🗺️ تغطية متكاملة للشبكة (تحديثات 2026)</b></summary>
-<br>
-التطبيق لا يقتصر على المترو التقليدي، بل يدمج خطوط النقل الحديثة في قاعدة بيانات موحدة:
-- **المترو**: الخطوط 1، 2، و3 (بما فيها تفرعات الخط الثالث حتى جامعة القاهرة ومحور روض الفرج).
-- **المونوريل**: محطات مونوريل شرق النيل التشغيلية والتجريبية.
-- **LRT**: القطار الكهربائي الخفيف بمساراته المؤدية للعاصمة الإدارية والعاشر من رمضان.
-</details>
-
-<details>
-<summary><b>🧠 توجيه ذكي مخصص للراحة (Dijkstra + Transfer Penalty)</b></summary>
-<br>
-الخوارزميات التقليدية قد تقترح عليك تحويل الخطوط ثلاث مرات لتوفير دقيقة واحدة! 
-هذا التطبيق يتفهم ذلك، لذا يعتمد على خوارزمية دايجسترا المضافة إليها "عقوبة التحويل" لتفضيل المسارات المستقيمة والمريحة طالما كان فرق الوقت غير مؤثر بشكل كبير.
-</details>
-
-<details>
-<summary><b>🔍 محرك بحث مرن وذكي جداً</b></summary>
-<br>
-وداعاً لمشاكل البحث عن المحطات بسبب الهمزات والتاء المربوطة. يدعم المحرك:
-- **تصفية الحروف**: إسقاط التشكيل ومساواة الهمزات والألف المقصورة والياء.
-- **الأسماء البديلة (Aliases)**: ابحث عن "رمسيس" وسيفهم التطبيق أنك تقصد "الشهداء"، ابحث عن "التحرير" وسيوجهك إلى "السادات".
-</details>
-
-<details>
-<summary><b>💵 حساب ديناميكي للتكلفة والوقت</b></summary>
-<br>
-يقوم التطبيق بحساب عدد المحطات لكل وسيلة نقل في رحلتك بشكل منفصل، ويطبق شرائح التسعير الرسمية المحدثة ليعطيك تكلفة التذكرة الإجمالية والزمن التقريبي الفعلي للرحلة.
-</details>
+* 🌍 **Seamless Coverage:** تغطية كاملة لـ (الخط 1، 2، 3 + فروعهم)، مونوريل شرق النيل، وـ LRT.
+* 🧠 **Smart Routing (Modified Dijkstra):** الخوارزمية مش بس بتجيب أقصر طريق، دي بتدّي "عقوبة" (Transfer Penalty) للتبديلات عشان متمرمطكش بين الخطوط لو فيه طريق أسهل.
+* 🔍 **Fuzzy Arabic Search:** بتكتب "التحرير"؟ هيوديك "السادات". بتكتب من غير همزات أو تشكيل؟ برضه هيفهمك.
+* 💸 **Auto-Pricing Engine:** بيحسبلك التكلفة الإجمالية تلقائياً بناءً على عدد المحطات وشرائح الأسعار المحدثة (حتى منتصف 2026).
+* 📱 **Native-like Vibe:** تصميم زجاجي (Glassmorphism)، أنيميشن سلس، ودعم كامل للـ Dark Mode. 
+* 💾 **Zero-Data State:** شغال PWA وبيكيّش (Cache) كل حاجة محلياً.. افتحه تحت الأرض براحتك.
 
 ---
 
-## 🛠️ الجانب التقني (Under the Hood)
+## 🤓 Nerd Out: The Routing Algorithm
 
-تم بناء التطبيق باستخدام فلسفة **Vanilla-First** (بدون أطر عمل ثقيلة مثل React أو Vue) لضمان سرعة تحميل فائقة وتجربة مستخدم خالية من اللاج والتعليق.
+عشان نضمن تجربة مستخدم مريحة، عدّلنا خوارزمية **Dijkstra** عشان تفهم إن "التبديل بين الخطوط متعب". 
+التكلفة مش بتتحسب بعدد المحطات بس، لكن أي تغيير لخط تاني بياخد `Penalty Weight` إضافي:
 
-### هيكلة البيانات ورسم البياني (Graph Representation)
-تُمثل المحطات كعقد (Nodes) والروابط بينها كحواف (Edges) داخل كائن Graph موحد في الذاكرة. 
-
-### منطق حساب التبديل وعقوبته:
 ```javascript
-// مقتطف من منطق دايجسترا المطور للتحويل المريح
-let stepCost = 1;
-
-// إذا قام المستخدم بتبديل الخط، نقوم بفرض عقوبة افتراضية بوزن 12 محطة
-// لضمان عدم توجيهه لخطوط متعددة إلا في حالة الضرورة القصوى لتوفير الوقت
+// 💡 The Magic Sauce: Interchange Penalty
 if (currentInfo.lastLine && currentInfo.lastLine !== edgeLine) {
-    stepCost += 12; 
+    stepCost += 12; // We punish unnecessary line switching!
 }
 ```
 
 ---
 
-## 📲 تطبيق ويب تقدمي (PWA)
+## 🚀 Quick Start (شغّله عندك)
 
-التطبيق مهيأ بالكامل ليعمل كتطبيق هاتف ذكي أصلي (Native-like App) بفضل التقنيات التالية:
-* **`manifest.json`**: يُعرّف الألوان، الأيقونات، وطريقة العرض كـ Standalone بدون شريط المتصفح.
-* **`sw.js` (Service Worker)**: يقوم بتخزين ملفات الواجهة والمنطق برمجياً في ذاكرة الكاش الخاصة بالمتصفح ليضمن تشغيل التطبيق الفوري حتى في أعمق محطات المترو التي لا تتوفر بها شبكة اتصال.
-
----
-
-## 💻 التشغيل المحلي
-
-إذا كنت ترغب في تشغيل التطبيق محلياً أو التعديل عليه، اتبع الخطوات البسيطة التالية:
+التطبيق `Zero-Dependencies`، يعني مفيش `npm install` ولا وجع دماغ.
 
 ```bash
-# 1. انسخ المستودع إلى جهازك
+# 1. Clone the repo
 git clone https://github.com/seif4d/Metro.git
 
-# 2. انتقل إلى مجلد المشروع
+# 2. Go to the project directory
 cd Metro
 
-# 3. شغل المشروع باستخدام أي سيرفر محلي (مثال باستخدام Python)
-python3 -m http.server 8000
+# 3. Open it up (using Live Server, Python, or just double click index.html)
+npx serve . 
+# أو لو عندك بايثون:
+# python -m http.server 8000
 ```
-> افتح المتصفح وتوجه إلى الرابط `http://localhost:8000`.
+> 🌐 افتح `http://localhost:8000` وعيش!
 
 ---
 
-## 🗺️ خريطة الطريق (Roadmap)
+## 📂 Project Structure
 
-- [x] إضافة خطوط المترو الـ 3 وتفرعات الخط الثالث الجديدة.
-- [x] دمج محطات مونوريل شرق النيل والقطار الكهربائي الخفيف (LRT).
-- [ ] إضافة مونوريل غرب النيل (٦ أكتوبر) فور تشغيله رسمياً.
-- [ ] إضافة الخط الرابع للمترو فور توفر البيانات الرسمية المؤكدة.
-- [ ] دعم المظهر الداكن/الفاتح التلقائي بناءً على إعدادات نظام التشغيل.
+هيكل احترافي وبسيط، مصمم عشان يكون خفيف على المتصفح:
 
----
-
-## 🤝 المساهمة وتطوير المشروع
-
-نرحب جداً بمساهمات مجتمع المطورين! سواء كنت تريد تحديث أسماء محطات، ضبط أسعار تذاكر، أو تحسين الواجهة البرمجية:
-1. قم بعمل **Fork** للمشروع.
-2. أنشئ فرعاً جديداً لتعديلاتك: `git checkout -b feature/NewFeature`.
-3. قم بعمل **Commit** يحمل وصفاً واضحاً للتعديل.
-4. ارفع الفرع وافتح **Pull Request**.
+```text
+📦 Metro
+ ┣ 📜 index.html         # The Brain & The Beauty (UI + Logic)
+ ┣ 📜 manifest.json      # PWA Identity & Installation rules
+ ┣ 📜 sw.js              # Service Worker (The Offline Hero)
+ ┣ 🖼️ favicon-32.png     # Web Icon
+ ┗ 🖼️ apple-touch-icon.png # iOS Homescreen Icon
+```
 
 ---
 
-## 📄 الترخيص وإخلاء المسؤولية
+## 🎟️ أسعار التذاكر المُدمجة (اضغط للتفاصيل)
 
-* المشروع متاح تحت رخصة **MIT** — لك كامل الحرية في تعديله وإعادة استخدامه.
-* **إخلاء مسؤولية**: هذا التطبيق هو جهد برمي مستقل غير تابع لأي جهة حكومية. البيانات مجمعة من مصادر وتصريحات رسمية، ويُرجى دائماً التأكد من لوحات الإعلانات الرسمية داخل المحطات لأي تحديثات طارئة في الأسعار أو مسارات القطارات.
+<details>
+<summary><b>🚇 المترو (الخطوط 1، 2، 3)</b></summary>
+<br>
+- حتى 9 محطات: 10 ج.م <br>
+- من 10 لـ 16 محطة: 12 ج.م <br>
+- من 17 لـ 23 محطة: 15 ج.م <br>
+- أكثر من 23 محطة: 20 ج.م
+</details>
+
+<details>
+<summary><b>🚝 مونوريل شرق النيل</b></summary>
+<br>
+- حتى 5 محطات: 20 ج.م <br>
+- حتى 10 محطات: 40 ج.م <br>
+- حتى 15 محطة: 55 ج.م <br>
+- أكثر من 15 محطة: 80 ج.م
+</details>
+
+<details>
+<summary><b>🚈 القطار الكهربائي الخفيف (LRT)</b></summary>
+<br>
+- حتى 3 محطات: 10 ج.م <br>
+- حتى 7 محطات: 15 ج.م <br>
+- أكثر من 7 محطات: 20 ج.م
+</details>
+
+---
+
+## 🤝 Let's Build Together (المساهمة)
+
+حابب تضيف الخط الرابع؟ تحسّن الـ UI؟ أو تظبط الـ Codebase؟
+الـ PRs مفتوحة للجميع!
+
+1. اعمل **Fork** للمشروع.
+2. اعمل **Branch** باسم التعديل بتاعك (`git checkout -b feature/CoolNewThing`).
+3. اعمل **Commit** لتعديلاتك (`git commit -m 'Added some magic'`).
+4. اعمل **Push** (`git push origin feature/CoolNewThing`).
+5. افتح **Pull Request** 🚀.
+
+---
+
+## 📜 License & Disclaimer
+
+- **الرخصة:** [MIT License](./LICENSE) - عيش براحتك، عدل، واستخدم الكود.
+- **تنويه:** هذا التطبيق مبني على البيانات الرسمية حتى *منتصف 2026*. الأسعار والمواعيد قد تتغير، لذا يُرجى مراجعة اللوحات الرسمية داخل المحطات للتأكيد.
 
 <div align="center">
-  <sub>تم تطويره بكل ❤️ لمساعدة ركاب النقل العام في القاهرة.</sub>
+  <br>
+  <b>Built with 💻 and ☕ by <a href="https://github.com/seif4d">Seif4D</a></b>
 </div>
