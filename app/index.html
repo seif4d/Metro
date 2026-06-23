@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <!-- إعدادات النشر والميتا الأساسية -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#060913">
-    <meta name="description" content="تطبيق مترو القاهرة الذكي - دليلك الأسرع لمعرفة مسارك، عدد المحطات، سعر التذكرة، والوقت المتوقع، بدون إنترنت. يشمل خطوط المترو الثلاثة، مونوريل شرق النيل، والقطار الكهربائي الخفيف.">
-    <meta name="keywords" content="مترو, القاهرة, مواصلات, مصر, تذكرة, خريطة المترو, مونوريل, القطار الخفيف">
-    <meta name="author" content="Metro App">
+    <meta name="description" content="تطبيق مترو القاهرة الذكي - دليلك لمعرفة مسارك، عدد المحطات، سعر التذكرة، والوقت المتوقع. يشمل خطوط المترو الثلاثة، مونوريل شرق النيل، والقطار الكهربائي الخفيف.">
+    <meta name="keywords" content="مترو, القاهرة, مواصلات, مصر, تذكرة, خريطة المترو, مونوريل, القطار الخفيف, LRT">
+    <meta name="author" content="Metro Cairo Guide">
 
-    <!-- إعدادات PWA للآيفون والأندرويد -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="مترو">
@@ -19,38 +17,31 @@
     <link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png">
     <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 
-    <title>مترو | دليلك الذكي</title>
+    <title>مترو القاهرة | دليلك الذكي</title>
 
-    <!-- الخطوط -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* ================= المتغيرات الأساسية ================= */
         :root {
             --bg-base: #060913;
             --glass-bg: rgba(17, 25, 40, 0.75);
             --glass-border: rgba(255, 255, 255, 0.08);
             --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-
             --text-main: #ffffff;
             --text-muted: #94a3b8;
             --accent: #3b82f6;
             --accent-glow: rgba(59, 130, 246, 0.5);
-
-            /* ألوان الشبكة */
             --l1: #0078D7; --l2: #FFC107; --l3: #00B259;
             --mono: #9C27B0; --lrt: #00BCD4;
             --warn: #f59e0b; --warn-bg: rgba(245, 158, 11, 0.14); --warn-border: rgba(245, 158, 11, 0.35);
             --ok: #10b981;
-
             --font-mono: 'JetBrains Mono', monospace;
             --radius-lg: 24px; --radius-md: 16px;
             --trans: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        /* ================= التنسيق العام ================= */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body {
@@ -63,7 +54,6 @@
             flex-direction: column;
         }
 
-        /* خلفية نيون متحركة */
         .ambient-bg {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
             background:
@@ -74,14 +64,12 @@
         }
         @keyframes breathe { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.1); opacity: 1; } }
 
-        /* تصميم شريط التمرير */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 
         #app { display: flex; flex: 1 1 auto; min-height: 0; width: 100%; }
 
-        /* ================= الشريط العلوي ================= */
         #topbar {
             display: flex; align-items: center; justify-content: space-between; gap: 10px;
             padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top));
@@ -103,7 +91,6 @@
         .install-pill:active { transform: scale(0.95); }
         .install-pill[hidden] { display: none; }
 
-        /* ================= شريط التنقل (Navigation) ================= */
         nav {
             background: rgba(10, 15, 28, 0.85);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -111,20 +98,16 @@
             display: flex; z-index: 100;
             padding-bottom: env(safe-area-inset-bottom);
         }
-
         .nav-btn {
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
             color: var(--text-muted); text-decoration: none; cursor: pointer; transition: var(--trans);
             padding: 12px 0; position: relative;
         }
-
         .nav-btn svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; transition: var(--trans); }
         .nav-btn span { font-size: 12px; font-weight: 700; transition: var(--trans); }
-
         .nav-btn.active { color: var(--accent); }
         .nav-btn.active svg { transform: translateY(-2px); filter: drop-shadow(0 4px 6px var(--accent-glow)); }
 
-        /* ================= الحاويات الزجاجية ================= */
         main { flex: 1; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
 
         .view-section { display: none; padding: 20px; padding-top: 20px; max-width: 800px; margin: 0 auto; animation: fadeUp 0.4s ease forwards; }
@@ -147,7 +130,6 @@
             margin-bottom: 6px; letter-spacing: -1px;
         }
 
-        /* ================= عناصر الإدخال ================= */
         .input-wrapper { position: relative; margin-bottom: 24px; }
         .input-wrapper label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
         .input-field {
@@ -158,7 +140,6 @@
         .input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), inset 0 2px 4px rgba(0,0,0,0.2); }
         .input-field::placeholder { color: rgba(255,255,255,0.2); font-weight: 400; }
 
-        /* القائمة المنبثقة للبحث عن المحطات */
         .combo-panel {
             position: absolute; top: 100%; right: 0; left: 0; margin-top: 6px;
             background: rgba(10, 15, 28, 0.97); border: 1px solid var(--glass-border); border-radius: 14px;
@@ -192,7 +173,6 @@
         }
         .btn-main:active { transform: scale(0.97); }
 
-        /* رقائق الرحلات الأخيرة */
         .recent-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 18px; }
         .recent-chips[hidden] { display: none; }
         .recent-label { font-size: 12px; color: var(--text-muted); font-weight: 700; }
@@ -203,8 +183,6 @@
         }
         .recent-chip:hover { background: rgba(59, 130, 246, 0.2); border-color: var(--accent); }
 
-        /* ================= النتائج والتسلسل الزمني ================= */
-        /* شريط ملخص الرحلة (طابع لوحة المحطات الرقمية) */
         .summary-strip {
             display: flex; align-items: center; gap: 6px; overflow-x: auto; padding: 4px 2px 14px;
             margin-bottom: 18px; border-bottom: 1px dashed var(--glass-border);
@@ -217,7 +195,6 @@
         .summary-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
         .summary-arrow { color: var(--text-muted); font-size: 14px; flex-shrink: 0; }
 
-        /* تنبيه القطاعات قيد التشغيل التجريبي */
         .notice-banner {
             display: flex; gap: 10px; align-items: flex-start; background: var(--warn-bg);
             border: 1px solid var(--warn-border); color: #fbbf24; padding: 14px 16px; border-radius: 14px;
@@ -239,7 +216,6 @@
         .fare-row i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
         .ticket-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; color: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-family: 'Cairo', sans-serif; }
 
-        /* التايم لاين */
         .route-timeline { position: relative; padding-right: 30px; }
         .route-timeline::before { content: ''; position: absolute; top: 10px; bottom: 10px; right: 15px; width: 2px; background: rgba(255,255,255,0.1); border-radius: 2px; }
 
@@ -262,7 +238,6 @@
         .tl-box p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
         .line-label { padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; }
 
-        /* تنبيهات الخطأ */
         .alert-error {
             background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);
             padding: 16px; border-radius: var(--radius-md); text-align: center; margin-top: 16px; font-weight: 600;
@@ -270,7 +245,6 @@
         }
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
 
-        /* ================= دليل الشبكة ================= */
         .line-card { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .line-card:last-child { border-bottom: none; }
         .line-dot { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; margin-top: 4px; }
@@ -279,6 +253,7 @@
         .status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 8px; }
         .status-ok { background: rgba(16, 185, 129, 0.15); color: #34d399; }
         .status-partial { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        .status-construction { background: rgba(239, 68, 68, 0.15); color: #f87171; }
 
         .update-log { list-style: none; }
         .update-log li { font-size: 13px; color: var(--text-muted); line-height: 1.8; margin-bottom: 10px; padding-right: 18px; position: relative; }
@@ -287,7 +262,6 @@
 
         .sources-note { font-size: 11px; color: rgba(148, 163, 184, 0.7); line-height: 1.8; text-align: center; padding: 8px 12px 24px; }
 
-        /* نصيحة تثبيت آيفون */
         .ios-tip {
             position: fixed; bottom: 90px; right: 16px; left: 16px; max-width: 420px; margin: 0 auto;
             background: rgba(15, 20, 35, 0.97); border: 1px solid var(--glass-border); border-radius: 16px;
@@ -300,7 +274,6 @@
             padding: 6px 14px; border-radius: 10px; cursor: pointer; font-family: inherit;
         }
 
-        /* ================= إمكانية الوصول ================= */
         button:focus-visible, a:focus-visible, input:focus-visible, .combo-item:focus-visible {
             outline: 2px solid var(--accent); outline-offset: 2px;
         }
@@ -313,7 +286,6 @@
             }
         }
 
-        /* ================= التجاوب (Responsive Design) ================= */
         @media (max-width: 767px) {
             #app { flex-direction: column; }
             nav { order: 2; }
@@ -328,12 +300,12 @@
             .split-layout { display: grid; grid-template-columns: 1.2fr 1.5fr; gap: 40px; align-items: start; }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
 
     <div class="ambient-bg"></div>
 
-    <!-- الشريط العلوي: الحالة + التثبيت -->
     <div id="topbar">
         <div class="topbar-brand">🚇 مترو القاهرة</div>
         <div class="topbar-actions">
@@ -343,7 +315,6 @@
     </div>
 
     <div id="app">
-        <!-- شريط التنقل المتجاوب -->
         <nav>
             <a class="nav-btn active" data-target="route-view">
                 <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
@@ -356,11 +327,8 @@
         </nav>
 
         <main>
-            <!-- 1. شاشة الملاحة الأساسية -->
             <section id="route-view" class="view-section active">
                 <div class="split-layout">
-
-                    <!-- لوحة البحث -->
                     <div>
                         <div style="margin-bottom: 24px;">
                             <h1 class="page-title">مترو القاهرة 🚇</h1>
@@ -392,7 +360,6 @@
                         </div>
                     </div>
 
-                    <!-- لوحة النتائج (تظهر بعد الحساب) -->
                     <div id="panelResult" style="display: none;" aria-live="polite">
                         <div class="glass-panel">
                             <h3 style="margin-bottom: 8px; font-size: 18px;">تفاصيل الرحلة</h3>
@@ -401,7 +368,7 @@
 
                             <div class="notice-banner" id="pendingNotice" hidden>
                                 <span class="ic">🚧</span>
-                                <span>يتضمن هذا المسار محطات <b>قيد التشغيل التجريبي</b> أو لا تزال في طور الافتتاح (مثل امتدادات مونوريل شرق النيل أو القطار الكهربائي الخفيف). تأكد من حالة التشغيل عبر الإعلانات الرسمية قبل التحرك.</span>
+                                <span>يتضمن هذا المسار محطات <b>قيد التشغيل التجريبي</b> أو لا تزال في طور الافتتاح. تأكد من حالة التشغيل عبر الإعلانات الرسمية قبل التحرك.</span>
                             </div>
 
                             <div class="stats-grid">
@@ -419,22 +386,17 @@
                                 </div>
                             </div>
 
-                            <div class="route-timeline" id="outTimeline">
-                                <!-- سيتم حقن مسار الرحلة هنا بواسطة JS -->
-                            </div>
+                            <div class="route-timeline" id="outTimeline"></div>
                         </div>
                     </div>
-
                 </div>
             </section>
 
-            <!-- 2. شاشة الدليل ومعلومات الشبكة -->
             <section id="guide-view" class="view-section">
                 <h1 class="page-title" style="margin-bottom: 24px;">دليل الشبكة 🗺️</h1>
 
                 <div class="split-layout">
                     <div>
-                        <!-- كارت الأسعار -->
                         <div class="glass-panel">
                             <h3 style="margin-bottom: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">تذاكر المترو (مُحدّثة 27 مارس 2026)</h3>
                             <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
@@ -456,22 +418,22 @@
                                 </div>
                             </div>
 
-                            <h3 style="margin: 24px 0 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">تذاكر مونوريل شرق النيل</h3>
+                            <h3 style="margin: 24px 0 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">تذاكر مونوريل شرق النيل (مُحدّثة مايو 2026)</h3>
                             <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
-                                    <span style="font-weight: 600;">من 1 إلى 5 محطات</span>
+                                    <span style="font-weight: 600;">حتى 5 محطات (منطقة 1)</span>
                                     <span class="ticket-badge" style="background: #CE93D8;">20 ج.م</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
-                                    <span style="font-weight: 600;">من 6 إلى 10 محطات</span>
+                                    <span style="font-weight: 600;">حتى 10 محطات (منطقة 2)</span>
                                     <span class="ticket-badge" style="background: #AB47BC; color:white;">40 ج.م</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
-                                    <span style="font-weight: 600;">من 11 إلى 15 محطة</span>
+                                    <span style="font-weight: 600;">حتى 15 محطة (منطقة 3)</span>
                                     <span class="ticket-badge" style="background: #8E24AA; color:white;">55 ج.م</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-weight: 600;">أكثر من 15 محطة</span>
+                                    <span style="font-weight: 600;">أكثر من 15 محطة (الخط كامل)</span>
                                     <span class="ticket-badge" style="background: #6A1B9A; color:white;">80 ج.م</span>
                                 </div>
                             </div>
@@ -493,18 +455,17 @@
                             </div>
                         </div>
 
-                        <!-- كارت آخر التحديثات -->
                         <div class="glass-panel">
                             <h3 style="margin-bottom: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">آخر تحديثات الشبكة</h3>
                             <ul class="update-log" style="margin-top: 16px;">
                                 <li><b>27 مارس 2026:</b> تحديث تعريفة تذاكر المترو إلى 10 / 12 / 15 / 20 جنيهًا حسب عدد المحطات.</li>
-                                <li><b>6 مايو 2026:</b> افتتاح أول 16 محطة من مونوريل شرق النيل، من "المشير طنطاوي" إلى "مدينة العدالة" بالعاصمة الإدارية.</li>
-                                <li><b>متوقع نهاية يونيو / يوليو 2026:</b> تشغيل آخر 6 محطات من مونوريل شرق النيل، من "الاستاد" إلى "جيهان السادات"، لتكتمل بذلك الـ22 محطة.</li>
+                                <li><b>6 مايو 2026:</b> افتتاح المرحلة الأولى من مونوريل شرق النيل (16 محطة من المشير طنطاوي إلى مدينة العدالة).</li>
+                                <li><b>أبريل 2026:</b> تشغيل المرحلة الثالثة من LRT (كاتدرائية الميلاد والقيادة الاستراتيجية) داخل العاصمة الإدارية.</li>
+                                <li><b>متوقع 2026-2027:</b> المرحلة الثانية للمونوريل (6 محطات من الاستاد إلى جيهان السادات).</li>
                             </ul>
                         </div>
                     </div>
 
-                    <!-- كارت الخطوط -->
                     <div class="glass-panel">
                         <h3 style="margin-bottom: 8px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">دليل الخطوط</h3>
                         <div id="linesGuide" style="margin-top: 8px;"></div>
@@ -513,14 +474,14 @@
                         <div class="line-card">
                             <div class="line-dot" style="background:#78909C;"></div>
                             <div>
-                                <div class="line-card-name">مونوريل غرب النيل (٦ أكتوبر) <span class="status-badge status-partial">🚧 تحت الإنشاء</span></div>
-                                <div class="line-card-sub">يربط محافظة الجيزة ومدينتي ٦ أكتوبر والشيخ زايد بالخط الثالث للمترو. لم يتم تأكيد القائمة النهائية للمحطات رسميًا حتى تاريخ هذا التحديث.</div>
+                                <div class="line-card-name">مونوريل غرب النيل (٦ أكتوبر) <span class="status-badge status-construction">🚧 تحت الإنشاء</span></div>
+                                <div class="line-card-sub">يربط محافظة الجيزة ومدينتي ٦ أكتوبر والشيخ زايد بالخط الثالث للمترو. لم يتم تأكيد القائمة النهائية للمحطات رسميًا.</div>
                             </div>
                         </div>
                         <div class="line-card">
                             <div class="line-dot" style="background:#78909C;"></div>
                             <div>
-                                <div class="line-card-name">الخط الرابع للمترو <span class="status-badge status-partial">🚧 تحت الإنشاء</span></div>
+                                <div class="line-card-name">الخط الرابع للمترو <span class="status-badge status-construction">🚧 تحت الإنشاء</span></div>
                                 <div class="line-card-sub">خط جديد قيد الإنشاء، سيُضاف إلى التطبيق فور توفر بيانات رسمية كاملة عن مساره ومحطاته.</div>
                             </div>
                         </div>
@@ -528,7 +489,7 @@
                         <p class="sources-note">
                             البيانات مجمّعة من تصريحات وزارة النقل والهيئة القومية لمترو الأنفاق ومصادر إخبارية رسمية حتى يونيو 2026.
                             قد تتغيّر الأسعار والمواعيد دون إشعار مسبق — يُرجى تأكيد مواعيد القطارات الدقيقة من الشاشات والقنوات الرسمية.
-                            <br>الإصدار 2.0
+                            <br>الإصدار 2.1
                         </p>
                     </div>
                 </div>
@@ -536,33 +497,71 @@
         </main>
     </div>
 
-    <!-- نصيحة تثبيت آيفون (لا يدعم Safari حدث beforeinstallprompt) -->
     <div class="ios-tip" id="iosTip" hidden>
         📲 لتثبيت التطبيق على الشاشة الرئيسية: اضغط على زر <b>المشاركة</b> أسفل المتصفح، ثم اختر <b>"إضافة إلى الشاشة الرئيسية"</b>.
         <br>
         <button id="iosTipClose" type="button">حسنًا، فهمت</button>
     </div>
 
-    <!-- ================= JavaScript (Logic & Algorithms) ================= -->
     <script>
-        /** --- 1. Data Models --- */
+        /** ==================== 1. DATA MODELS ==================== */
         const LINES = {
-            L1:  { name: "الخط الأول",  hex: "#0078D7", sub: "حلوان ↔ المرج الجديدة" },
-            L2:  { name: "الخط الثاني", hex: "#FFC107", sub: "المنيب ↔ شبرا الخيمة", dark: true },
-            L3:  { name: "الخط الثالث", hex: "#00B259", sub: "عدلي منصور ↔ جامعة القاهرة / روض الفرج" },
-            ME:  { name: "مونوريل شرق النيل", hex: "#9C27B0", sub: "الاستاد ↔ مدينة العدالة" },
-            LRT: { name: "القطار الكهربائي الخفيف", hex: "#00BCD4", sub: "عدلي منصور ↔ العاصمة المركزية / العاشر من رمضان", dark: true }
+            L1:  { name: "الخط الأول",  hex: "#0078D7", sub: "حلوان ↔ المرج الجديدة (35 محطة)" },
+            L2:  { name: "الخط الثاني", hex: "#FFC107", sub: "المنيب ↔ شبرا الخيمة (20 محطة)", dark: true },
+            L3:  { name: "الخط الثالث", hex: "#00B259", sub: "عدلي منصور ↔ جامعة القاهرة / محور روض الفرج (34 محطة)" },
+            ME:  { name: "مونوريل شرق النيل", hex: "#9C27B0", sub: "المشير طنطاوي ↔ مدينة العدالة (16 محطة مشغلة)" },
+            LRT: { name: "القطار الكهربائي الخفيف", hex: "#00BCD4", sub: "عدلي منصور ↔ العاصمة المركزية / العاشر من رمضان (19 محطة)", dark: true }
         };
 
         const PATHS = {
-            "L1": ["حلوان", "عين حلوان", "جامعة حلوان", "وادي حوف", "حدائق حلوان", "المعصرة", "طرة الأسمنت", "كوتسيكا", "طرة البلد", "ثكنات المعادي", "المعادي", "حدائق المعادي", "دار السلام", "الزهراء", "مار جرجس", "الملك الصالح", "السيدة زينب", "سعد زغلول", "السادات", "جمال عبد الناصر", "عرابي", "الشهداء", "غمرة", "الدمرداش", "منشية الصدر", "كوبري القبة", "حمامات القبة", "سراي القبة", "حدائق الزيتون", "حلمية الزيتون", "المطرية", "عين شمس", "عزبة النخل", "المرج", "المرج الجديدة"],
-            "L2": ["المنيب", "ساقية مكي", "أم المصريين", "الجيزة", "فيصل", "جامعة القاهرة", "البحوث", "الدقي", "الأوبرا", "السادات", "محمد نجيب", "العتبة", "الشهداء", "مسرة", "روض الفرج", "سانت تريزا", "الخلفاوي", "المظلات", "كلية الزراعة", "شبرا الخيمة"],
-            "L3_1": ["عدلي منصور", "الهايكستب", "عمر بن الخطاب", "قباء", "هشام بركات", "النزهة", "نادي الشمس", "ألف مسكن", "هليوبوليس", "هارون", "الأهرام", "كلية البنات", "الاستاد", "أرض المعارض", "العباسية", "عبده باشا", "الجيش", "باب الشعرية", "العتبة", "جمال عبد الناصر", "ماسبيرو", "صفاء حجازي", "الكيت كات"],
-            "L3_2": ["الكيت كات", "السودان", "إمبابة", "البوهي", "القومية", "الطريق الدائري", "محور روض الفرج"],
-            "L3_3": ["الكيت كات", "التوفيقية", "وادي النيل", "جامعة الدول", "بولاق الدكرور", "جامعة القاهرة"],
-            "ME": ["الاستاد", "هشام بركات (المونوريل)", "جامعة الأزهر", "الحي السابع", "المشير أحمد إسماعيل", "جيهان السادات", "المشير طنطاوي", "وان ناينتي", "المستشفى الجوي", "النرجس", "المستثمرين", "اللوتس", "جولدن سكوير", "بيت الوطن", "مسجد الفتاح العليم", "الحي R1", "الحي R2", "حي المال والأعمال", "مدينة الفنون والثقافة", "الحي الحكومي", "مسجد مصر", "مدينة العدالة"],
-            "LRT_1": ["عدلي منصور", "العبور", "المستقبل", "الشروق", "هليوبوليس الجديدة", "بدر", "الروبيكي", "حدائق العاصمة", "مطار العاصمة", "مدينة الفنون والثقافة", "كاتدرائية الميلاد", "القيادة الاستراتيجية", "المدينة الرياضية الدولية", "العاصمة المركزية"],
-            "LRT_2": ["بدر", "المنطقة الصناعية", "مدينة المعرفة", "غرب العاشر", "العاشر من رمضان", "مركز المدينة"]
+            "L1": [
+                "حلوان", "عين حلوان", "جامعة حلوان", "وادي حوف", "حدائق حلوان",
+                "المعصرة", "طرة الأسمنت", "كوتسيكا", "طرة البلد", "ثكنات المعادي",
+                "المعادي", "حدائق المعادي", "دار السلام", "الزهراء", "مار جرجس",
+                "الملك الصالح", "السيدة زينب", "سعد زغلول", "السادات", "جمال عبد الناصر",
+                "عرابي", "الشهداء", "غمرة", "الدمرداش", "منشية الصدر",
+                "كوبري القبة", "حمامات القبة", "سراي القبة", "حدائق الزيتون", "حلمية الزيتون",
+                "المطرية", "عين شمس", "عزبة النخل", "المرج", "المرج الجديدة"
+            ],
+            "L2": [
+                "المنيب", "ساقية مكي", "أم المصريين", "الجيزة", "فيصل",
+                "جامعة القاهرة", "البحوث", "الدقي", "الأوبرا", "السادات",
+                "محمد نجيب", "العتبة", "الشهداء", "مسرة", "روض الفرج",
+                "سانت تريزا", "الخلفاوي", "المظلات", "كلية الزراعة", "شبرا الخيمة"
+            ],
+            "L3_1": [
+                "عدلي منصور", "الهايكستب", "عمر بن الخطاب", "قباء", "هشام بركات",
+                "النزهة", "نادي الشمس", "ألف مسكن", "هيليوبوليس", "هارون",
+                "الأهرام", "كلية البنات", "الاستاد", "أرض المعارض", "العباسية",
+                "عبده باشا", "الجيش", "باب الشعرية", "العتبة", "جمال عبد الناصر",
+                "ماسبيرو", "صفاء حجازي", "الكيت كات"
+            ],
+            "L3_2": [
+                "الكيت كات", "السودان", "إمبابة", "البوهي", "القومية العربية",
+                "الطريق الدائري", "محور روض الفرج"
+            ],
+            "L3_3": [
+                "الكيت كات", "التوفيقية", "وادي النيل", "جامعة الدول العربية", "بولاق الدكرور",
+                "جامعة القاهرة"
+            ],
+            "ME": [
+                "المشير طنطاوي", "وان ناينتي", "المستشفى الجوي", "النرجس", "المستثمرين",
+                "اللوتس", "جولدن سكوير", "بيت الوطن", "مسجد الفتاح العليم", "الحي R1",
+                "الحي R2", "حي المال والأعمال", "مدينة الفنون والثقافة", "الحي الحكومي",
+                "مسجد مصر", "مدينة العدالة"
+            ],
+            "ME_PHASE2": [
+                "الاستاد", "هشام بركات (المونوريل)", "جامعة الأزهر", "الحي السابع",
+                "المشير أحمد إسماعيل", "جيهان السادات"
+            ],
+            "LRT_1": [
+                "عدلي منصور", "العبور", "المستقبل", "الشروق", "هليوبوليس الجديدة",
+                "بدر", "الروبيكي", "حدائق العاصمة", "مطار العاصمة", "مدينة الفنون والثقافة",
+                "كاتدرائية الميلاد", "القيادة الاستراتيجية", "المدينة الرياضية الدولية", "العاصمة المركزية"
+            ],
+            "LRT_2": [
+                "بدر", "المنطقة الصناعية", "العاشر من رمضان (1)", "العاشر من رمضان (2)", "العاشر من رمضان (3)"
+            ]
         };
 
         const ALIASES = {
@@ -578,23 +577,26 @@
             "العدالة": "مدينة العدالة",
             "الفنون والثقافة": "مدينة الفنون والثقافة",
             "التسعين": "وان ناينتي",
-            "المال والأعمال": "حي المال والأعمال"
+            "المال والأعمال": "حي المال والأعمال",
+            "العاشر من رمضان": "العاشر من رمضان (1)",
+            "القيادة الاستراتيجية": "القيادة الاستراتيجية",
+            "الأوكتاجون": "القيادة الاستراتيجية"
         };
 
-        // محطات لا تزال قيد التشغيل التجريبي أو الإنشاء
         const PENDING_STATIONS = new Set([
-            "هشام بركات (المونوريل)", "جامعة الأزهر", "الحي السابع", "المشير أحمد إسماعيل", "جيهان السادات",
-            "كاتدرائية الميلاد", "القيادة الاستراتيجية", "المدينة الرياضية الدولية", "العاصمة المركزية",
-            "غرب العاشر", "العاشر من رمضان", "مركز المدينة"
+            "الاستاد", "هشام بركات (المونوريل)", "جامعة الأزهر", "الحي السابع",
+            "المشير أحمد إسماعيل", "جيهان السادات",
+            "العاشر من رمضان (2)", "العاشر من رمضان (3)"
         ]);
 
-        // متوسط الدقائق بين كل محطتين متتاليتين
         const PER_STATION_MIN = { L1: 2.2, L2: 2.2, L3: 2.2, ME: 3.2, LRT: 5.5 };
-        // وقت التحويل الفعلي والانتظار بين الخطوط بالدقائق
-        const INTERCHANGE_MIN = { "العتبة": 8, "السادات": 7, "جامعة القاهرة": 6, "عدلي منصور": 6, "مدينة الفنون والثقافة": 6, "الاستاد": 5 };
+        const INTERCHANGE_MIN = {
+            "العتبة": 8, "السادات": 7, "جامعة القاهرة": 6,
+            "عدلي منصور": 6, "مدينة الفنون والثقافة": 6, "الاستاد": 5
+        };
         const DEFAULT_INTERCHANGE_MIN = 5;
 
-        /** --- 2. Graph Construction --- */
+        /** ==================== 2. GRAPH CONSTRUCTION ==================== */
         const graph = {};
         const stationLines = {};
 
@@ -614,34 +616,29 @@
             for (let i = 0; i < stations.length - 1; i++) addEdge(stations[i], stations[i + 1], lId);
         });
 
-        /** --- 3. Algorithms & Text Processing --- */
-        // إزالة التشكيل وتوحيد الحروف المتشابهة لتجربة بحث فائقة المرونة
+        /** ==================== 3. ALGORITHMS ==================== */
         const stripDiacritics = (s) => {
             if (!s) return "";
-            return s
-                .trim()
+            return s.trim()
                 .replace(/[أإآأ]/g, 'ا')
                 .replace(/ة/g, 'ه')
                 .replace(/[ىي]/g, 'ي')
-                .replace(/[\u064B-\u065F]/g, ''); // حذف علامات التشكيل
+                .replace(/[ً-ٟ]/g, '');
         };
 
         const normalize = (val) => {
             if (!val) return "";
             let v = stripDiacritics(val);
-            // 1. فحص الأسماء المستعارة (Aliases) أولاً
             for (let [alias, real] of Object.entries(ALIASES)) {
                 let na = stripDiacritics(alias);
                 if (v === na || v.includes(na)) return real;
             }
-            // 2. فحص المطابقة المباشرة بعد المعالجة لجميع المحطات المسجلة بالرسم البياني
             for (let station of Object.keys(graph)) {
                 if (stripDiacritics(station) === v) return station;
             }
             return val.trim();
         };
 
-        // خوارزمية دايجسترا الذكية مع فرض "عقوبة تحويل" لمنع عمليات التبديل غير المريحة
         const dijkstra = (start, end) => {
             if (start === end) return [start];
             const dist = {};
@@ -651,14 +648,10 @@
             queue.push({ node: start, cost: 0 });
 
             while (queue.length > 0) {
-                // ترتيب الطابور للحصول على العقدة الأقل تكلفة (Priority Queue)
                 queue.sort((a, b) => a.cost - b.cost);
                 const { node, cost } = queue.shift();
 
-                if (node === end) {
-                    return dist[end].path;
-                }
-
+                if (node === end) return dist[end].path;
                 if (cost > dist[node].cost) continue;
 
                 const neighbors = graph[node] || [];
@@ -667,13 +660,9 @@
                     const edgeLine = neighbor.line;
                     const currentInfo = dist[node];
 
-                    // تكلفة ركوب المحطة العادية هي 1 (وزن افتراضي)
                     let stepCost = 1;
-
-                    // في حال تبديل الخط، يتم فرض عقوبة بمقدار 12 "وزن افتراضي"
-                    // لضمان عدم توجيه المستخدم لخطوط متعددة إلا في الضرورة القصوى
                     if (currentInfo.lastLine && currentInfo.lastLine !== edgeLine) {
-                        stepCost += 12; 
+                        stepCost += 12;
                     }
 
                     const totalCost = currentInfo.cost + stepCost;
@@ -709,7 +698,6 @@
             return inst;
         };
 
-        // حساب التكلفة الكلية للرحلة بناء على عدد محطات كل وسيلة
         function computeFare(insts) {
             let metroStops = 0, monoStops = 0, lrtStops = 0;
             insts.forEach(i => {
@@ -728,7 +716,6 @@
                 rows.push({ label: 'تذكرة المونوريل', value: `${v} ج.م`, hex: LINES.ME.hex });
             }
             if (lrtStops > 0) {
-                // حساب تعرفة الـ LRT تلقائياً وفقاً للشرائح الرسمية المحدثة
                 let v = lrtStops <= 3 ? 10 : lrtStops <= 7 ? 15 : 20;
                 rows.push({ label: 'تذكرة القطار الخفيف', value: `${v} ج.م`, hex: LINES.LRT.hex });
             }
@@ -736,7 +723,6 @@
             return rows;
         }
 
-        // حساب الوقت التقديري
         function computeTime(insts) {
             let total = 0;
             insts.forEach(i => {
@@ -750,7 +736,7 @@
             return path.some(s => PENDING_STATIONS.has(s));
         }
 
-        /** --- 4. مكوّن البحث التلقائي عن المحطات (Combobox) --- */
+        /** ==================== 4. COMBOBOX ==================== */
         function buildCombobox(input) {
             const wrap = input.parentElement;
             const panel = document.createElement('div');
@@ -791,9 +777,7 @@
                     const active = i === activeIndex;
                     el.classList.toggle('active', active);
                     el.setAttribute('aria-selected', active ? 'true' : 'false');
-                    if (active) {
-                        input.setAttribute('aria-activedescendant', el.id);
-                    }
+                    if (active) input.setAttribute('aria-activedescendant', el.id);
                 });
                 const el = panel.querySelector('.combo-item.active');
                 if (el) el.scrollIntoView({ block: 'nearest' });
@@ -805,12 +789,12 @@
                 input.dispatchEvent(new Event('change'));
             }
 
-            function close() { 
-                panel.classList.remove('open'); 
+            function close() {
+                panel.classList.remove('open');
                 input.setAttribute('aria-expanded', 'false');
                 input.removeAttribute('aria-activedescendant');
-                panel.innerHTML = ''; 
-                activeIndex = -1; 
+                panel.innerHTML = '';
+                activeIndex = -1;
             }
 
             input.addEventListener('input', () => render(filter(input.value)));
@@ -831,8 +815,8 @@
             return { close };
         }
 
-        /** --- 5. الرحلات الأخيرة (محفوظة محليًا على الجهاز) --- */
-        const RECENTS_KEY = 'metro_recent_trips_v1';
+        /** ==================== 5. RECENTS ==================== */
+        const RECENTS_KEY = 'metro_recent_trips_v2';
         function loadRecents() {
             try { return JSON.parse(localStorage.getItem(RECENTS_KEY) || '[]'); } catch { return []; }
         }
@@ -853,10 +837,9 @@
             ).join('');
         }
 
-        /** --- 6. واجهات التحكم --- */
-        // التنقل بين الأقسام
+        /** ==================== 6. UI CONTROLLERS ==================== */
         document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
                 btn.classList.add('active');
@@ -874,7 +857,6 @@
 
         document.getElementById('btnSwap').addEventListener('click', () => {
             [inStart.value, inEnd.value] = [inEnd.value, inStart.value];
-            // غلق أي لوحة مقترحات نشطة عند استخدام زر التبديل لتفادي المشاكل البصرية
             document.querySelectorAll('.combo-panel').forEach(panel => panel.classList.remove('open'));
         });
 
@@ -906,14 +888,12 @@
             if (!graph[e]) return showError(`محطة "${inEnd.value}" غير موجودة. تأكد من الاسم أو اخترها من القائمة.`);
             if (s === e) return showError("أنت بالفعل في محطة الوصول!");
 
-            // استخدام دايجسترا المطور للوصول لأفضل مسار مريح وخالٍ من التحويلات الكثيرة
             let path = dijkstra(s, e);
             if (!path) return showError("تعذر العثور على مسار بين هاتين المحطتين.");
 
             let insts = getRouteInstructions(path);
             let stopsCount = path.length - 1;
 
-            // تحديث الإحصائيات الفورية
             document.getElementById('outStops').innerHTML = `${stopsCount} <span style="font-weight:500; font-size:12px;">محطة</span>`;
             document.getElementById('outTime').innerHTML = `~ ${computeTime(insts)} <span style="font-weight:500; font-size:12px;">دقيقة</span>`;
 
@@ -930,7 +910,6 @@
             renderSummary(insts);
             document.getElementById('pendingNotice').hidden = !hasPending(path);
 
-            // بناء التايم لاين للرحلة
             const tl = document.getElementById('outTimeline');
             tl.innerHTML = '';
 
@@ -959,7 +938,6 @@
                 tl.appendChild(d);
             });
 
-            // محطة النهاية والوصول
             let final = document.createElement('div');
             final.className = 'tl-node';
             final.style.animationDelay = `${insts.length * 0.15}s`;
@@ -989,14 +967,14 @@
             document.getElementById('btnRoute').click();
         });
 
-        /** --- 7. بناء دليل الخطوط تلقائياً --- */
+        /** ==================== 7. LINES GUIDE ==================== */
         (function renderLinesGuide() {
             const data = [
-                { key: 'L1', status: 'ok', note: 'يعمل بالكامل' },
-                { key: 'L2', status: 'ok', note: 'يعمل بالكامل' },
-                { key: 'L3', status: 'ok', note: 'يعمل بالكامل (٣ فروع: روض الفرج وجامعة القاهرة)' },
-                { key: 'ME', status: 'partial', note: '16 من 22 محطة تعمل الآن، والباقي قريبًا' },
-                { key: 'LRT', status: 'partial', note: 'الخط الرئيسي يعمل، وامتدادات العاصمة والعاشر من رمضان قيد التوسع' },
+                { key: 'L1', status: 'ok', note: 'يعمل بالكامل - 35 محطة' },
+                { key: 'L2', status: 'ok', note: 'يعمل بالكامل - 20 محطة' },
+                { key: 'L3', status: 'ok', note: 'يعمل بالكامل - 34 محطة (3 فروع)' },
+                { key: 'ME', status: 'partial', note: '16 من 22 محطة تعمل (من المشير طنطاوي إلى مدينة العدالة)' },
+                { key: 'LRT', status: 'partial', note: 'الخط الرئيسي يعمل (14 محطة)، وامتداد العاشر من رمضان قيد التوسع' },
             ];
             const wrap = document.getElementById('linesGuide');
             wrap.innerHTML = data.map(d => {
@@ -1015,7 +993,7 @@
             }).join('');
         })();
 
-        /** --- 8. تطبيق ويب تقدمي (PWA): تثبيت + عمل بدون إنترنت --- */
+        /** ==================== 8. PWA ==================== */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(() => {});
